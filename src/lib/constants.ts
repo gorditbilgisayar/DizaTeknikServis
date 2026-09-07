@@ -3,53 +3,60 @@
  * Copyright © 2024-2026 Gördit Bilgisayar — Zafer GÖRGÜN
  */
 
-import type { DurumMeta, TeknikServisDurumu } from '../types';
+import type {
+  DurumMeta,
+  TeknikServisDurumu,
+  FaaliyetAlani,
+  IslemTuru,
+  ServisTuru,
+  TeklifDurumu,
+} from '../types';
 
 export const DURUMLAR: Record<TeknikServisDurumu, DurumMeta> = {
   KabulEdildi: {
     label: 'Kabul Edildi',
     badgeClass: 'badge-blue',
-    color: '#2563eb',
-    bgLight: 'rgba(37, 99, 235, 0.12)',
+    color: '#0284c7',
+    bgLight: 'rgba(2, 132, 199, 0.12)',
     icon: 'PackageCheck',
   },
   Incelemede: {
-    label: 'İncelemede',
+    label: 'İncelemede / Keşifte',
     badgeClass: 'badge-amber',
     color: '#d97706',
     bgLight: 'rgba(217, 119, 6, 0.12)',
     icon: 'Search',
   },
   OnayBekliyor: {
-    label: 'Onay Bekliyor',
+    label: 'Teklif / Onay Bekliyor',
     badgeClass: 'badge-orange',
     color: '#ea580c',
     bgLight: 'rgba(234, 88, 12, 0.12)',
     icon: 'ClockAlert',
   },
   ParcaBekliyor: {
-    label: 'Parça Bekliyor',
+    label: 'Parça / Ürün Bekliyor',
     badgeClass: 'badge-purple',
     color: '#9333ea',
     bgLight: 'rgba(147, 51, 234, 0.12)',
     icon: 'PackageOpen',
   },
   Tamirde: {
-    label: 'Tamirde / İşlemde',
+    label: 'Tamirde / Montajda',
     badgeClass: 'badge-cyan',
     color: '#0891b2',
     bgLight: 'rgba(8, 145, 178, 0.12)',
     icon: 'Wrench',
   },
   Tamamlandi: {
-    label: 'Tamamlandı (Hazır)',
+    label: 'Tamamlandı (Hazır / Devrede)',
     badgeClass: 'badge-emerald',
     color: '#059669',
     bgLight: 'rgba(5, 150, 105, 0.12)',
     icon: 'CheckCircle2',
   },
   TeslimEdildi: {
-    label: 'Teslim Edildi',
+    label: 'Teslim / Montaj Bitti',
     badgeClass: 'badge-slate',
     color: '#475569',
     bgLight: 'rgba(71, 85, 105, 0.12)',
@@ -65,83 +72,174 @@ export const DURUMLAR: Record<TeknikServisDurumu, DurumMeta> = {
   IptalIade: {
     label: 'İptal / İade',
     badgeClass: 'badge-red',
-    color: '#dc2626',
-    bgLight: 'rgba(220, 38, 38, 0.12)',
+    color: '#e30613',
+    bgLight: 'rgba(227, 6, 19, 0.12)',
     icon: 'XCircle',
   },
 };
 
+export const SERVIS_TURLERI: Record<ServisTuru, { label: string; icon: string; desc: string }> = {
+  IcServis: {
+    label: 'İç Servis (Atölye)',
+    icon: 'Store',
+    desc: 'Cihaz atölyeye/servis merkezimize teslim alındı',
+  },
+  DisServis: {
+    label: 'Dış Servis (Saha / Montaj)',
+    icon: 'Truck',
+    desc: 'Müşteri yerinde keşif, montaj, kurulum veya yerinde arıza çözümü',
+  },
+};
+
+export const FAALIYET_ALANLARI: Record<FaaliyetAlani, { label: string; icon: string; color: string; badge: string }> = {
+  Bilgisayar: {
+    label: 'Bilgisayar & Donanım & Sunucu',
+    icon: 'Laptop',
+    color: '#0284c7',
+    badge: 'badge-blue',
+  },
+  GuvenlikKamerasi: {
+    label: 'Güvenlik Kamerası (CCTV / IP)',
+    icon: 'Video',
+    color: '#059669',
+    badge: 'badge-emerald',
+  },
+  AlarmSistemi: {
+    label: 'Hırsız Alarm Sistemleri',
+    icon: 'BellRing',
+    color: '#e30613',
+    badge: 'badge-red',
+  },
+  Yazilim: {
+    label: 'Yazılım & Muhasebe & Otomasyon',
+    icon: 'Code2',
+    color: '#7c3aed',
+    badge: 'badge-purple',
+  },
+  Network: {
+    label: 'Network & Ağ & Kablolama',
+    icon: 'Network',
+    color: '#0891b2',
+    badge: 'badge-cyan',
+  },
+  YanginAlarm: {
+    label: 'Yangın Alarm & Algılama',
+    icon: 'Flame',
+    color: '#ea580c',
+    badge: 'badge-orange',
+  },
+  Diger: {
+    label: 'Diğer Hizmetler',
+    icon: 'Layers',
+    color: '#475569',
+    badge: 'badge-slate',
+  },
+};
+
+export const ISLEM_TURLERI: Record<IslemTuru, { label: string; icon: string }> = {
+  ArizaCozum: { label: 'Arıza Çözümü & Onarım', icon: 'Wrench' },
+  MontajKurulum: { label: 'Montaj & Kurulum & Devreye Alma', icon: 'Hammer' },
+  Teklif: { label: 'Fiyat Teklifi Verme', icon: 'FileSpreadsheet' },
+  KesifProje: { label: 'Yerinde Keşif & Projelendirme', icon: 'Compass' },
+  PeriyodikBakim: { label: 'Sözleşmeli Periyodik Bakım', icon: 'RotateCw' },
+};
+
+export const TEKLIF_DURUMLARI: Record<TeklifDurumu, { label: string; color: string; badgeClass: string }> = {
+  TeklifYok: { label: 'Teklif Yok', color: '#64748b', badgeClass: 'badge-slate' },
+  Hazirlaniyor: { label: 'Teklif Hazırlanıyor', color: '#f59e0b', badgeClass: 'badge-amber' },
+  Sunuldu: { label: 'Müşteriye Sunuldu', color: '#0284c7', badgeClass: 'badge-blue' },
+  Onaylandi: { label: 'Teklif Onaylandı', color: '#10b981', badgeClass: 'badge-emerald' },
+  Reddedildi: { label: 'Teklif Reddedildi', color: '#e30613', badgeClass: 'badge-red' },
+};
+
 export const CIHAZ_TIPLERI = [
+  // Bilgisayar
   'Laptop / Dizüstü Bilgisayar',
-  'Masaüstü Bilgisayar (Kasa)',
+  'Masaüstü Bilgisayar (PC)',
+  'Sunucu / Server & Storage',
   'Monitör / All-in-One PC',
-  'Akıllı Telefon / Cep Telefonu',
-  'Tablet',
-  'Yazıcı / Tarayıcı / Fotokopi',
-  'Oyun Konsolu (PlayStation / Xbox)',
-  'Anakart / Ekran Kartı (Bileşen)',
-  'Güç Kaynağı / UPS',
-  'Ağ Cihazı / Modem / Router',
-  'Harici Disk / Veri Kurtarma',
-  'Diğer Elektronik Cihaz',
+  'Yazıcı / Barkod Yazıcı / Tarayıcı',
+  // Kamera
+  'IP Kamera / Dome / Bullet',
+  'AHD / Analog Güvenlik Kamerası',
+  'NVR / DVR Kamera Kayıt Cihazı',
+  'PTZ Speed Dome Hareketli Kamera',
+  // Alarm
+  'Hırsız Alarm Paneli',
+  'Harici / Dahili Siren & Flaşör',
+  'PIR Hareket Dedektörü & Manyetik Kontak',
+  // Network
+  'Yönetilebilir PoE Switch',
+  'Router / Firewall / Modem',
+  'Wi-Fi Access Point (Tavan / Dış Ortam)',
+  'Rack Kabin / Patch Panel / PDU',
+  // Yangın
+  'Konvansiyonel / Adresli Yangın Paneli',
+  'Optik Duman / Isı Dedektörü',
+  'Yangın İhbar Butonu & Sireni',
+  // Yazılım & Diğer
+  'Ticari Ön Muhasebe / SQL Veritabanı',
+  'Restoran / POS Otomasyon Sistemi',
+  'Kesintisiz Güç Kaynağı (UPS)',
+  'Diğer Sistem / Cihaz',
 ];
 
 export const POPULER_MARKALAR = [
-  'Apple',
-  'Asus',
-  'Lenovo',
-  'HP',
+  'Dahua',
+  'Hikvision',
+  'Paradox',
+  'DSC',
+  'Ajax',
+  'Ruijie / Reyee',
+  'Ubiquiti / UniFi',
+  'TP-Link / Omada',
+  'Cisco',
+  'HP / Aruba',
   'Dell',
-  'Acer',
-  'Samsung',
-  'Xiaomi',
-  'Huawei',
-  'Monster',
-  'MSI',
-  'Canon',
-  'Epson',
-  'Sony',
-  'LG',
-  'Casper',
-  'Diğer Marka',
+  'Lenovo',
+  'Asus',
+  'Mavigard',
+  'Finder',
+  'ZKTeco',
+  'Diza Yazılım',
+  'Gördit Bilgisayar',
 ];
 
 export const STANDART_AKSESUARLAR = [
-  'Orijinal Şarj Adaptörü',
-  'Güç Kablosu',
+  'Güç Adaptörü / Trafo',
+  'Kamera Montaj Ayağı / Buat',
+  'Uzaktan Kumanda / Keypad',
+  'PoE Adaptör / Enjektör',
+  'Patch Kablo / Ara Kablo',
+  'Hard Disk (Kayıt Diski)',
+  'Akü / Yedek Batarya',
   'Taşıma Çantası',
-  'Kablosuz Mouse / Fare',
-  'SIM Kart',
-  'Hafıza Kartı (SD)',
-  'USB Dongle / Alıcı',
-  'Orijinal Kutusu',
-  'Ekran Koruyucu / Kılıf',
-  'Batarya / Pil',
+  'Yazılım Lisans Anahtarı',
 ];
 
 export const STANDART_ARIZALAR = [
-  'Cihaz hiç açılmıyor / Güç yok',
-  'Ekrana görüntü gelmiyor',
-  'Ekran kırık / Dokunmatik çalışmıyor',
-  'Şarj almıyor / Soket temassızlık yapıyor',
-  'Cihaza sıvı döküldü / Sıvı teması',
-  'Aşırı ısınıyor ve kendiliğinden kapanıyor',
-  'Çok yavaş çalışıyor / Format ve bakım isteniyor',
-  'Mavi ekran hatası veriyor / Windows açılmıyor',
-  'Klavye bazı tuşlar basmıyor / Sıvı hasarlı',
-  'Hoparlörden ses çıkmıyor / Mikrofon çalışmıyor',
-  'Wi-Fi / İnternet bağlantısı kopuyor',
-  'Veri kurtarma talep ediliyor',
+  'Kamera görüntüsü yok / Sinyal kesik',
+  'Gece görüşü (IR LED) çalışmıyor / Karıncalı',
+  'Kayıt cihazı açılmıyor / Bip bip ötüyor / HDD görmüyor',
+  'Alarm sistemi sebepsiz yere ötüyor / Yanlış alarm veriyor',
+  'Alarm paneli elektrik kesintisinde susuyor / Akü bitik',
+  'Network internete çıkmıyor / IP dağıtmıyor',
+  'Access Point Wi-Fi yayını yapmıyor / Kopmalar var',
+  'Yangın dedektörü arıza / kirlilik uyarısı veriyor',
+  'Yangın butonu basılı kaldı / Panel resetlenmiyor',
+  'Bilgisayar açılmıyor / Mavi ekran / Format isteniyor',
+  'SQL veri tabanı bağlantı hatası veriyor',
+  'Yeni şube / işyeri için kamera & alarm keşfi ve montajı',
 ];
 
 export const ON_HAZIR_FIZIKSEL_KONTROLLER = [
-  { id: 'siviTemasi', label: 'Sıvı Teması Var' },
-  { id: 'ekranKirik', label: 'Ekran Kırık / Çatlak' },
-  { id: 'cizikVar', label: 'Kasa / Kapak Çizik' },
-  { id: 'darbeVar', label: 'Darbe / Ezik / Kırık Köşe' },
-  { id: 'acilmiyor', label: 'Cihaz Açılmıyor' },
-  { id: 'sarjAlmiyor', label: 'Şarj Almıyor' },
-  { id: 'asinIsinma', label: 'Aşırı Isınma Var' },
-  { id: 'sesYok', label: 'Ses / Hoparlör Bozuk' },
-  { id: 'kameraArizali', label: 'Kamera Arızalı' },
+  { id: 'siviTemasi', label: 'Sıvı Teması / Nem / Oksitlenme' },
+  { id: 'ekranKirik', label: 'Ekran / Lens / Cam Kırık' },
+  { id: 'cizikVar', label: 'Kasa / Gövde Çizik & Yıpranmış' },
+  { id: 'darbeVar', label: 'Düşme / Darbe / Kırık Ayak' },
+  { id: 'acilmiyor', label: 'Cihaz / Panel Hiç Açılmıyor' },
+  { id: 'sarjAlmiyor', label: 'Besleme / Adaptör Girişi Arızalı' },
+  { id: 'asinIsinma', label: 'Aşırı Isınma / Fan Çalışmıyor' },
+  { id: 'sesYok', label: 'Buzzer / Siren / Ses Çıkmıyor' },
+  { id: 'kameraArizali', label: 'Sensör / Lens Arızası Var' },
 ];

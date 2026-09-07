@@ -9,9 +9,11 @@ import {
   ChevronRight,
   Printer,
   MessageCircle,
+  Store,
+  Truck,
 } from 'lucide-react';
 import { useServices } from '../context/ServiceContext';
-import { DURUMLAR } from '../lib/constants';
+import { DURUMLAR, FAALIYET_ALANLARI } from '../lib/constants';
 import { formatMoney, buildWhatsAppLink } from '../lib/format';
 import type { TeknikServisItem, TeknikServisDurumu } from '../types';
 
@@ -123,9 +125,14 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         onClick={() => onSelectService(item)}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                          <span style={{ fontWeight: 800, fontSize: '12px', color: '#38bdf8' }}>
-                            {item.servisNo}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontWeight: 800, fontSize: '12px', color: '#fff' }}>
+                              {item.servisNo}
+                            </span>
+                            <span className={`badge ${item.servisTuru === 'DisServis' ? 'badge-dis-servis' : 'badge-ic-servis'}`} style={{ fontSize: '9px', padding: '1px 4px' }}>
+                              {item.servisTuru === 'DisServis' ? 'Saha' : 'Atölye'}
+                            </span>
+                          </div>
                           {item.oncelik !== 'Normal' && (
                             <span
                               style={{

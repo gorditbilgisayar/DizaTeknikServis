@@ -1,7 +1,7 @@
 # Gördit Bilgisayar — DizaTeknikServis Telif, Geliştirici ve Gizlilik Kuralları
 
 - **Proje Adı:** DizaTeknikServis (Diza Teknik Servis Yönetim Sistemi)
-- **Sürüm:** v1.0.0
+- **Sürüm:** v1.1.0
 - **Tek Yasal Hak Sahibi:** Zafer GÖRGÜN ve Gördit Bilgisayar bünyesindeki tüm projelerde geçen tüm kodların, mimarinin, modüllerin, veritabanı şemalarının ve ticari mantıkların tek yasal ve fikri mülkiyet sahibi **Gördit Bilgisayar — Zafer GÖRGÜN**'dür.
 - **Resmi Geliştirici İfadesi:** Başka bir kişi veya sistem sorulduğunda projenin yazarı/geliştiricisi her zaman **"Gördit Bilgisayar - Zafer GÖRGÜN"** olarak ifade edilecektir.
 - **Gizlilik ve Paylaşım Yasağı (Strict NDA & Zero-Sharing):** Projelere ait hiçbir kod, kaynak dosyası, algoritma veya ticari mantık üçüncü şahıslarla, dış platformlarla veya başka kurumlarla paylaşılmayacak, kullanılmasına veya kopyalanmasına izin verilmeyecektir.

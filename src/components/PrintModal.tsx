@@ -116,30 +116,37 @@ export const PrintModal: React.FC<PrintModalProps> = ({
               }}
             >
               <div>
-                {/* Antet ve Başlık */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #0284c7', paddingBottom: '14px', marginBottom: '16px' }}>
+                {/* Antet ve Başlık - Diza Yazılım Renkleri */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '3px solid #e30613', paddingBottom: '12px', marginBottom: '16px' }}>
                   <div>
-                    <h1 style={{ fontSize: '20px', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
+                    <h1 style={{ fontSize: '18px', fontWeight: 900, color: '#e30613', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
                       {companySettings.firmaAdi}
                     </h1>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 800, color: '#1a237e' }}>
                       {companySettings.resmiUnvan}
                     </div>
-                    <div style={{ color: '#64748b', fontSize: '11px', marginTop: '2px' }}>
+                    <div style={{ color: '#475569', fontSize: '11px', marginTop: '2px' }}>
                       {companySettings.adres}
                     </div>
-                    <div style={{ color: '#475569', fontSize: '11px' }}>
+                    <div style={{ color: '#334155', fontSize: '11px', fontWeight: 600 }}>
                       Tel: {companySettings.telefon} | GSM: {companySettings.gsm} | {companySettings.email}
                     </div>
                   </div>
 
                   <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 800, color: '#0284c7' }}>
-                      TEKNİK SERVİS FORMU
+                    <div style={{ fontSize: '14px', fontWeight: 900, color: '#1a237e', textTransform: 'uppercase' }}>
+                      {service.islemTuru === 'Teklif'
+                        ? 'FİYAT TEKLİFİ & PROJE FORMU'
+                        : service.servisTuru === 'DisServis'
+                        ? 'SAHA MONTAJ & SERVİS TUTANAĞI'
+                        : 'ATÖLYE SERVİS KABUL FORMU'}
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#e30613', fontWeight: 700, marginTop: '2px' }}>
+                      {service.servisTuru === 'DisServis' ? '🚛 DIŞ SERVİS (SAHA)' : '🏠 İÇ SERVİS (ATÖLYE)'}
                     </div>
                     <div style={{ marginTop: '4px' }} dangerouslySetInnerHTML={{ __html: barcodeSvg }} />
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                      Geliş Tarihi: {formatDateTime(service.gelisTarihi)}
+                      Tarih: {formatDateTime(service.gelisTarihi)}
                     </div>
                   </div>
                 </div>

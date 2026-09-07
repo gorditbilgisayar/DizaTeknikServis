@@ -15,6 +15,31 @@ export type TeknikServisDurumu =
   | 'IptalIade'
   | 'OdemesiBekliyor';
 
+export type ServisTuru = 'IcServis' | 'DisServis';
+
+export type FaaliyetAlani =
+  | 'Bilgisayar'
+  | 'GuvenlikKamerasi'
+  | 'AlarmSistemi'
+  | 'Yazilim'
+  | 'Network'
+  | 'YanginAlarm'
+  | 'Diger';
+
+export type IslemTuru =
+  | 'ArizaCozum'
+  | 'MontajKurulum'
+  | 'Teklif'
+  | 'KesifProje'
+  | 'PeriyodikBakim';
+
+export type TeklifDurumu =
+  | 'TeklifYok'
+  | 'Hazirlaniyor'
+  | 'Sunuldu'
+  | 'Onaylandi'
+  | 'Reddedildi';
+
 export interface DurumMeta {
   label: string;
   badgeClass: string;
@@ -51,7 +76,20 @@ export interface TeknikServisItem {
   musteriAdres?: string;
   musteriTcVergiNo?: string;
 
-  cihazTipi: string; // Laptop, PC, Tablet, Telefon vs.
+  // Yeni Faaliyet & Lokasyon Alanları
+  servisTuru: ServisTuru; // İç Servis (Atölye) veya Dış Servis (Saha)
+  faaliyetAlani: FaaliyetAlani; // Bilgisayar, Güvenlik Kamerası, Alarm, Yazılım, Network, Yangın Alarm
+  islemTuru: IslemTuru; // Arıza Çözüm, Montaj/Kurulum, Teklif, Keşif/Proje, Periyodik Bakım
+  teklifDurumu?: TeklifDurumu; // Teklif aşamaları
+  teklifGecerlilikTarihi?: string;
+
+  // Dış Servis & Saha Bilgileri
+  sahaAdresi?: string;
+  sahaRandevuTarihi?: string;
+  sahaEkibi?: string;
+  sahaNotu?: string;
+
+  cihazTipi: string; // Laptop, PC, NVR/Kamera, Alarm Paneli, Switch, Yangın Butonu vs.
   markaModel: string;
   seriNoImei: string;
   cihazSifresi?: string;
@@ -72,9 +110,9 @@ export interface TeknikServisItem {
   kameraArizali: boolean;
   fizikselDurumNotu?: string;
 
-  arizaTanimi: string; // Müşteri Şikayeti
-  teknisyenTespit?: string; // Ön inceleme
-  yapilanIslemler?: string;
+  arizaTanimi: string; // Müşteri Şikayeti / Talep
+  teknisyenTespit?: string; // Ön inceleme / Keşif Notu
+  yapilanIslemler?: string; // Montaj & Müdahale Raporu
 
   fotograflar: string[]; // base64 / blob urls
 

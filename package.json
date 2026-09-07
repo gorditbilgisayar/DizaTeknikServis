@@ -1,8 +1,8 @@
 {
   "name": "dizateknikservis",
   "private": true,
-  "version": "1.0.0",
-  "description": "Diza Teknik Servis — Gördit Bilgisayar kuruluşu. Web, mobil ve tablet uyumlu profesyonel teknik servis yönetim sistemi.",
+  "version": "1.1.0",
+  "description": "Diza Teknik Servis — Kamera, Alarm, Network, Yangın, Bilgisayar ve Yazılım. Gördit Bilgisayar kuruluşu.",
   "author": "Gördit Bilgisayar - Zafer GÖRGÜN <bilgi@gorditbilgisayar.com>",
   "copyright": "Copyright © 2024-2026 Gördit Bilgisayar. Tüm hakları saklıdır.",
   "type": "module",

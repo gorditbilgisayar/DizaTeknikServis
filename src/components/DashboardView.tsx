@@ -14,6 +14,9 @@ import {
   ArrowUpRight,
   Plus,
   Flame,
+  Store,
+  Truck,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { useServices } from '../context/ServiceContext';
 import { DURUMLAR } from '../lib/constants';
@@ -34,6 +37,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const { services, cashMoves } = useServices();
 
   const activeServices = services.filter(s => !['TeslimEdildi', 'IptalIade'].includes(s.durum));
+  const icServisCount = services.filter(s => s.servisTuru === 'IcServis' && !['TeslimEdildi', 'IptalIade'].includes(s.durum)).length;
+  const disServisCount = services.filter(s => s.servisTuru === 'DisServis' && !['TeslimEdildi', 'IptalIade'].includes(s.durum)).length;
+  const teklifCount = services.filter(s => s.islemTuru === 'Teklif').length;
   const waitingApproval = services.filter(s => s.durum === 'OnayBekliyor');
   const waitingParts = services.filter(s => s.durum === 'ParcaBekliyor');
   const completedReady = services.filter(s => s.durum === 'Tamamlandi');
@@ -47,12 +53,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const pendingReceivables = activeServices.reduce((sum, s) => sum + s.kalanTutar, 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Karşılama ve Hızlı Başlat */}
       <div
         className="glass-card"
         style={{
-          background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%)',
+          background: 'linear-gradient(135deg, rgba(227, 6, 19, 0.16) 0%, rgba(26, 35, 126, 0.4) 100%)',
+          borderLeft: '4px solid #e30613',
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
@@ -61,21 +68,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         }}
       >
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#fff' }}>
-            Teknik Servis Yönetim Paneli
+          <h1 style={{ fontSize: '22px', fontWeight: 900, color: '#fff' }}>
+            Diza Teknik Servis & Güvenlik & Network Paneli
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '4px' }}>
-            Gördit Bilgisayar güvencesiyle servis durumlarını, parça stoklarını ve kasa hareketlerini canlı izleyin.
+          <p style={{ color: '#cbd5e1', fontSize: '13px', marginTop: '4px' }}>
+            Kamera, Alarm, Yangın, Bilgisayar, Network ve Yazılım için İç (Atölye) ve Dış (Saha / Montaj) süreç yönetimi.
           </p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button
             type="button"
             className="btn btn-primary"
             onClick={onOpenNewService}
           >
             <Plus size={18} />
-            <span>Yeni Cihaz Girişi</span>
+            <span>Yeni Kayıt & Montaj</span>
           </button>
         </div>
       </div>
@@ -83,62 +90,62 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* KPI Kartları Grid */}
       <div className="kpi-grid">
         <div className="kpi-card" onClick={() => onGoToTab('services')} style={{ cursor: 'pointer' }}>
-          <div className="kpi-icon-box" style={{ background: 'rgba(37, 99, 235, 0.15)', color: '#60a5fa' }}>
-            <Wrench size={24} />
+          <div className="kpi-icon-box" style={{ background: 'rgba(26, 35, 126, 0.3)', color: '#818cf8' }}>
+            <Store size={22} />
           </div>
           <div className="kpi-info">
-            <h4>Aktif Servisler</h4>
-            <div className="kpi-val">{activeServices.length}</div>
+            <h4>İç Servis (Atölye)</h4>
+            <div className="kpi-val">{icServisCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card" onClick={() => onGoToTab('services')} style={{ cursor: 'pointer' }}>
+          <div className="kpi-icon-box" style={{ background: 'rgba(227, 6, 19, 0.2)', color: '#ff6b72' }}>
+            <Truck size={22} />
+          </div>
+          <div className="kpi-info">
+            <h4>Dış Servis (Saha / Montaj)</h4>
+            <div className="kpi-val">{disServisCount}</div>
+          </div>
+        </div>
+
+        <div className="kpi-card" onClick={() => onGoToTab('services')} style={{ cursor: 'pointer' }}>
+          <div className="kpi-icon-box" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}>
+            <FileSpreadsheet size={22} />
+          </div>
+          <div className="kpi-info">
+            <h4>Teklifler & Keşif</h4>
+            <div className="kpi-val">{teklifCount}</div>
           </div>
         </div>
 
         <div className="kpi-card" onClick={() => onGoToTab('kanban')} style={{ cursor: 'pointer' }}>
-          <div className="kpi-icon-box" style={{ background: 'rgba(234, 88, 12, 0.15)', color: '#fb923c' }}>
-            <Clock size={24} />
+          <div className="kpi-icon-box" style={{ background: 'rgba(46, 125, 50, 0.2)', color: '#4ade80' }}>
+            <CheckCircle2 size={22} />
           </div>
           <div className="kpi-info">
-            <h4>Onay Bekleyenler</h4>
-            <div className="kpi-val">{waitingApproval.length}</div>
-          </div>
-        </div>
-
-        <div className="kpi-card" onClick={() => onGoToTab('kanban')} style={{ cursor: 'pointer' }}>
-          <div className="kpi-icon-box" style={{ background: 'rgba(147, 51, 234, 0.15)', color: '#c084fc' }}>
-            <Boxes size={24} />
-          </div>
-          <div className="kpi-info">
-            <h4>Parça Bekleyenler</h4>
-            <div className="kpi-val">{waitingParts.length}</div>
-          </div>
-        </div>
-
-        <div className="kpi-card" onClick={() => onGoToTab('kanban')} style={{ cursor: 'pointer' }}>
-          <div className="kpi-icon-box" style={{ background: 'rgba(5, 150, 105, 0.15)', color: '#34d399' }}>
-            <CheckCircle2 size={24} />
-          </div>
-          <div className="kpi-info">
-            <h4>Hazır / Teslimata</h4>
+            <h4>Hazır / Montaj Bitti</h4>
             <div className="kpi-val">{completedReady.length}</div>
           </div>
         </div>
 
         <div className="kpi-card" onClick={() => onGoToTab('cashier')} style={{ cursor: 'pointer' }}>
           <div className="kpi-icon-box" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-            <Receipt size={24} />
+            <Receipt size={22} />
           </div>
           <div className="kpi-info">
             <h4>Kasa Tahsilatı</h4>
-            <div className="kpi-val" style={{ fontSize: '20px' }}>{formatMoney(totalRevenue)}</div>
+            <div className="kpi-val" style={{ fontSize: '18px' }}>{formatMoney(totalRevenue)}</div>
           </div>
         </div>
 
         <div className="kpi-card">
           <div className="kpi-icon-box" style={{ background: 'rgba(225, 29, 72, 0.15)', color: '#fb7185' }}>
-            <AlertTriangle size={24} />
+            <AlertTriangle size={22} />
           </div>
           <div className="kpi-info">
-            <h4>Bekleyen Bakiye</h4>
-            <div className="kpi-val" style={{ fontSize: '20px' }}>{formatMoney(pendingReceivables)}</div>
+            <h4>Kalan Bakiye</h4>
+            <div className="kpi-val" style={{ fontSize: '18px' }}>{formatMoney(pendingReceivables)}</div>
           </div>
         </div>
       </div>

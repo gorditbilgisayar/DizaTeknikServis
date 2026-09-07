@@ -127,13 +127,16 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
               <Wrench size={20} />
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <h3 style={{ fontSize: '20px', fontWeight: 800 }}>{service.servisNo}</h3>
+                <span className={`badge ${service.servisTuru === 'DisServis' ? 'badge-dis-servis' : 'badge-ic-servis'}`}>
+                  {service.servisTuru === 'DisServis' ? '🚛 Dış Servis (Saha / Montaj)' : '🏠 İç Servis (Atölye)'}
+                </span>
                 <span className={`badge ${currentMeta.badgeClass}`}>
                   {currentMeta.label}
                 </span>
               </div>
-              <p style={{ fontSize: '12px', color: '#94a3b8' }}>
+              <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
                 {service.markaModel} — {service.musteriAdSoyad}
               </p>
             </div>
@@ -247,6 +250,21 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                   ))}
                 </div>
               </div>
+
+              {/* Dış Servis Saha Detayı */}
+              {service.servisTuru === 'DisServis' && (
+                <div style={{ background: 'rgba(227, 6, 19, 0.12)', border: '1px solid rgba(227, 6, 19, 0.35)', borderRadius: '12px', padding: '14px' }}>
+                  <div style={{ fontWeight: 800, color: '#ff6b72', fontSize: '13px', marginBottom: '8px' }}>
+                    Saha Montaj & Müdahale Bilgileri
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', fontSize: '13px' }}>
+                    <div><strong>Saha Adresi:</strong> <span style={{ color: '#fff' }}>{service.sahaAdresi || service.musteriAdres}</span></div>
+                    <div><strong>Randevu Tarihi:</strong> <span style={{ color: '#38bdf8' }}>{service.sahaRandevuTarihi || 'Planlanmadı'}</span></div>
+                    <div><strong>Saha Ekibi:</strong> <span style={{ color: '#fff' }}>{service.sahaEkibi || service.atananTeknisyenAd}</span></div>
+                    {service.sahaNotu && <div style={{ gridColumn: 'span 2', color: '#ff6b72' }}><strong>Saha Notu:</strong> {service.sahaNotu}</div>}
+                  </div>
+                </div>
+              )}
 
               {/* Müşteri ve Cihaz */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>

@@ -1,7 +1,7 @@
 /**
  * Diza Teknik Servis — Gördit Bilgisayar
  * Copyright © 2024-2026 Gördit Bilgisayar — Zafer GÖRGÜN
- * Mobil & Tablet Uyumlu Cihaz Kabul Formu
+ * İç / Dış Servis, Kamera, Alarm, Network, Yangın, Yazılım ve Montaj/Teklif Formu
  */
 
 import React, { useState } from 'react';
@@ -15,6 +15,17 @@ import {
   Save,
   Grid,
   FileText,
+  Truck,
+  Store,
+  Video,
+  BellRing,
+  Network,
+  Flame,
+  Code2,
+  Hammer,
+  FileSpreadsheet,
+  MapPin,
+  Calendar,
 } from 'lucide-react';
 import { useServices } from '../context/ServiceContext';
 import {
@@ -23,10 +34,20 @@ import {
   STANDART_AKSESUARLAR,
   STANDART_ARIZALAR,
   ON_HAZIR_FIZIKSEL_KONTROLLER,
+  FAALIYET_ALANLARI,
+  ISLEM_TURLERI,
+  SERVIS_TURLERI,
 } from '../lib/constants';
 import { formatPhoneNumber } from '../lib/format';
 import { PatternLock } from './PatternLock';
-import type { TeknikServisItem, OdemeTuru } from '../types';
+import type {
+  TeknikServisItem,
+  OdemeTuru,
+  ServisTuru,
+  FaaliyetAlani,
+  IslemTuru,
+  TeklifDurumu,
+} from '../types';
 
 interface NewServiceModalProps {
   isOpen: boolean;
@@ -41,12 +62,26 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
 }) => {
   const { addService, technicians } = useServices();
 
+  // Servis ve Faaliyet Seçimi
+  const [servisTuru, setServisTuru] = useState<ServisTuru>('IcServis');
+  const [faaliyetAlani, setFaaliyetAlani] = useState<FaaliyetAlani>('GuvenlikKamerasi');
+  const [islemTuru, setIslemTuru] = useState<IslemTuru>('ArizaCozum');
+  const [teklifDurumu, setTeklifDurumu] = useState<TeklifDurumu>('Hazirlaniyor');
+
+  // Dış Servis (Saha) Bilgileri
+  const [sahaAdresi, setSahaAdresi] = useState('');
+  const [sahaRandevuTarihi, setSahaRandevuTarihi] = useState('');
+  const [sahaEkibi, setSahaEkibi] = useState('');
+  const [sahaNotu, setSahaNotu] = useState('');
+
+  // Müşteri Bilgileri
   const [musteriAdSoyad, setMusteriAdSoyad] = useState('');
   const [musteriTelefon, setMusteriTelefon] = useState('');
   const [musteriEmail, setMusteriEmail] = useState('');
   const [musteriAdres, setMusteriAdres] = useState('');
 
-  const [cihazTipi, setCihazTipi] = useState('Laptop / Dizüstü Bilgisayar');
+  // Cihaz ve Donanım
+  const [cihazTipi, setCihazTipi] = useState('IP Kamera / Dome / Bullet');
   const [markaModel, setMarkaModel] = useState('');
   const [seriNoImei, setSeriNoImei] = useState('');
   const [cihazSifresi, setCihazSifresi] = useState('');
@@ -112,25 +147,34 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
     e.preventDefault();
 
     if (!musteriAdSoyad.trim()) {
-      alert('Lütfen müşteri ad ve soyadını giriniz.');
+      alert('Lütfen müşteri / firma adını giriniz.');
       return;
     }
     if (!musteriTelefon.trim()) {
-      alert('Lütfen müşteri telefon numarasını giriniz.');
+      alert('Lütfen telefon numarasını giriniz.');
       return;
     }
     if (!markaModel.trim()) {
-      alert('Lütfen cihaz marka ve modelini giriniz.');
+      alert('Lütfen sistem veya cihaz modelini giriniz.');
       return;
     }
     if (!arizaTanimi.trim()) {
-      alert('Lütfen arıza veya müşteri şikayetini giriniz.');
+      alert('Lütfen arıza veya talep açıklamasını giriniz.');
       return;
     }
 
     const secilenTech = technicians.find(t => t.id === atananTeknisyenId);
 
     const newService = addService({
+      servisTuru,
+      faaliyetAlani,
+      islemTuru,
+      teklifDurumu: islemTuru === 'Teklif' ? teklifDurumu : 'TeklifYok',
+      sahaAdresi: servisTuru === 'DisServis' ? (sahaAdresi || musteriAdres) : undefined,
+      sahaRandevuTarihi: servisTuru === 'DisServis' ? sahaRandevuTarihi : undefined,
+      sahaEkibi: servisTuru === 'DisServis' ? sahaEkibi : undefined,
+      sahaNotu: servisTuru === 'DisServis' ? sahaNotu : undefined,
+
       musteriAdSoyad,
       musteriTelefon,
       musteriEmail,
@@ -154,7 +198,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
       fizikselDurumNotu,
       arizaTanimi,
       fotograflar,
-      durum: 'KabulEdildi',
+      durum: islemTuru === 'Teklif' ? 'OnayBekliyor' : 'KabulEdildi',
       atananTeknisyenId,
       atananTeknisyenAd: secilenTech?.adSoyad,
       satirlar: [],
@@ -168,7 +212,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
       odemeTuru,
       tahsilEdildi: false,
       garantiKapsaminda: false,
-      garantiSuresiAy: 6,
+      garantiSuresiAy: 24,
       oncelik,
     });
 
@@ -181,16 +225,16 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
       <div
         className="modal-content"
         onClick={e => e.stopPropagation()}
-        style={{ maxWidth: '960px' }}
+        style={{ maxWidth: '980px' }}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div className="brand-logo-icon" style={{ width: '32px', height: '32px' }}>
+            <div className="brand-logo-icon" style={{ width: '34px', height: '34px' }}>
               <Wrench size={18} />
             </div>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Yeni Servis & Cihaz Kabul</h3>
-              <p style={{ fontSize: '12px', color: '#94a3b8' }}>Gördit Bilgisayar Servis Takip Fişi</p>
+              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Yeni Servis & Montaj & Teklif Kaydı</h3>
+              <p style={{ fontSize: '12px', color: '#94a3b8' }}>Diza Yazılım & Gördit Bilgisayar</p>
             </div>
           </div>
           <button
@@ -203,21 +247,207 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-            {/* 1. Bölüm: Müşteri Bilgileri */}
-            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
-              <h4 style={{ fontSize: '14px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <User size={16} /> 1. Müşteri Bilgileri
+          <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {/* 1. Bölüm: Servis Lokasyonu (İç Servis / Dış Servis) ve İşlem Türü */}
+            <div style={{ background: 'rgba(26, 35, 126, 0.15)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  1. Servis Türü & Lokasyon
+                </span>
+                <span style={{ fontSize: '12px', color: '#38bdf8' }}>Atölye içi veya Müşteri yerinde saha</span>
+              </div>
+
+              {/* İç / Dış Servis Butonları */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+                <button
+                  type="button"
+                  onClick={() => setServisTuru('IcServis')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    background: servisTuru === 'IcServis' ? 'var(--navy-gradient)' : 'rgba(15, 23, 42, 0.6)',
+                    border: servisTuru === 'IcServis' ? '2px solid #38bdf8' : '1px solid var(--border-color)',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    transition: 'all 0.18s ease',
+                  }}
+                >
+                  <Store size={20} color={servisTuru === 'IcServis' ? '#38bdf8' : '#94a3b8'} />
+                  <div>
+                    <div>İç Servis (Atölye / Mağaza)</div>
+                    <div style={{ fontSize: '11px', fontWeight: 400, color: '#cbd5e1' }}>Cihaz atölyemize teslim alındı</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setServisTuru('DisServis')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '10px',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    background: servisTuru === 'DisServis' ? 'var(--accent-gradient)' : 'rgba(15, 23, 42, 0.6)',
+                    border: servisTuru === 'DisServis' ? '2px solid #ff6b72' : '1px solid var(--border-color)',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '14px',
+                    transition: 'all 0.18s ease',
+                  }}
+                >
+                  <Truck size={20} color={servisTuru === 'DisServis' ? '#fff' : '#94a3b8'} />
+                  <div>
+                    <div>Dış Servis (Saha / Montaj / Keşif)</div>
+                    <div style={{ fontSize: '11px', fontWeight: 400, color: '#ffe5e7' }}>Müşteri yerinde montaj & müdahale</div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Faaliyet Alanı Seçimi */}
+              <div style={{ marginBottom: '12px' }}>
+                <label className="form-label">Hizmet / Faaliyet Alanı:</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+                  {Object.entries(FAALIYET_ALANLARI).map(([k, v]) => {
+                    const isSelected = faaliyetAlani === k;
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => setFaaliyetAlani(k as FaaliyetAlani)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '8px 10px',
+                          borderRadius: '8px',
+                          background: isSelected ? 'rgba(227, 6, 19, 0.25)' : 'rgba(0,0,0,0.25)',
+                          border: isSelected ? '1px solid var(--logo-red)' : '1px solid var(--border-color)',
+                          color: isSelected ? '#fff' : '#94a3b8',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: isSelected ? 700 : 500,
+                          textAlign: 'left',
+                        }}
+                      >
+                        {k === 'GuvenlikKamerasi' && <Video size={15} color={v.color} />}
+                        {k === 'AlarmSistemi' && <BellRing size={15} color={v.color} />}
+                        {k === 'Bilgisayar' && <Smartphone size={15} color={v.color} />}
+                        {k === 'Network' && <Network size={15} color={v.color} />}
+                        {k === 'YanginAlarm' && <Flame size={15} color={v.color} />}
+                        {k === 'Yazilim' && <Code2 size={15} color={v.color} />}
+                        {k === 'Diger' && <Wrench size={15} color={v.color} />}
+                        <span>{v.label.split('&')[0]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* İşlem Türü (Arıza / Montaj / Teklif / Keşif / Bakım) */}
+              <div>
+                <label className="form-label">İşlem Türü:</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {Object.entries(ISLEM_TURLERI).map(([k, v]) => {
+                    const isSelected = islemTuru === k;
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        onClick={() => setIslemTuru(k as IslemTuru)}
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          background: isSelected ? 'var(--accent-gradient)' : 'rgba(255,255,255,0.05)',
+                          border: isSelected ? 'none' : '1px solid var(--border-color)',
+                          color: isSelected ? '#fff' : '#cbd5e1',
+                          fontSize: '12px',
+                          fontWeight: isSelected ? 700 : 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {v.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Eğer Dış Servis İse Saha Bilgileri Alanı */}
+              {servisTuru === 'DisServis' && (
+                <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px dashed rgba(255,255,255,0.1)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <MapPin size={14} color="#ff6b72" /> Montaj & Saha Adresi
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Örn: Toroslar Mah. Organize San. 3. Blok No:12"
+                      value={sahaAdresi}
+                      onChange={e => setSahaAdresi(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Calendar size={14} color="#38bdf8" /> Randevu & Montaj Tarihi/Saati
+                    </label>
+                    <input
+                      type="datetime-local"
+                      className="form-control"
+                      value={sahaRandevuTarihi}
+                      onChange={e => setSahaRandevuTarihi(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Saha Ekibi / Teknisyenler</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Örn: Murat Usta & Caner Teknisyen (Araç: 33 AB 123)"
+                      value={sahaEkibi}
+                      onChange={e => setSahaEkibi(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Saha Notu (İskele, Merdiven, Özel İzin)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Örn: Tavan 6 metre, merdiven götürülecek."
+                      value={sahaNotu}
+                      onChange={e => setSahaNotu(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Bölüm: Müşteri Bilgileri */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <h4 style={{ fontSize: '13px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: 700 }}>
+                <User size={16} /> 2. Müşteri / Firma Bilgileri
               </h4>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Müşteri Adı Soyadı *</label>
+                  <label className="form-label">Müşteri / Firma Adı *</label>
                   <input
                     type="text"
                     required
                     className="form-control"
-                    placeholder="Örn: Ahmet YILMAZ"
+                    placeholder="Örn: Toros Lojistik A.Ş. veya Ahmet YILMAZ"
                     value={musteriAdSoyad}
                     onChange={e => setMusteriAdSoyad(e.target.value)}
                   />
@@ -240,18 +470,18 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                   <input
                     type="email"
                     className="form-control"
-                    placeholder="musteri@ornek.com"
+                    placeholder="info@firma.com"
                     value={musteriEmail}
                     onChange={e => setMusteriEmail(e.target.value)}
                   />
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Adres / Semt / İlçe</label>
+                  <label className="form-label">Şehir / İlçe / Fatura Adresi</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Örn: Mersin / Akdeniz"
+                    placeholder="Mersin / Akdeniz"
                     value={musteriAdres}
                     onChange={e => setMusteriAdres(e.target.value)}
                   />
@@ -259,15 +489,15 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
               </div>
             </div>
 
-            {/* 2. Bölüm: Cihaz Bilgileri */}
-            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
-              <h4 style={{ fontSize: '14px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <Smartphone size={16} /> 2. Cihaz & Güvenlik Bilgileri
+            {/* 3. Bölüm: Cihaz / Sistem Tanımı */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <h4 style={{ fontSize: '13px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: 700 }}>
+                <Smartphone size={16} /> 3. Sistem & Cihaz Tanımı
               </h4>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Cihaz Tipi</label>
+                  <label className="form-label">Sistem / Donanım Tipi</label>
                   <select
                     className="form-control"
                     value={cihazTipi}
@@ -285,13 +515,13 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                     type="text"
                     required
                     className="form-control"
-                    placeholder="Örn: Asus ROG Strix G15 / iPhone 13"
+                    placeholder="Örn: Dahua 16 Kanal NVR / Paradox SP4000"
                     value={markaModel}
                     onChange={e => setMarkaModel(e.target.value)}
                   />
                   {/* Popüler Marka Çipleri */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '6px' }}>
-                    {POPULER_MARKALAR.slice(0, 8).map(m => (
+                    {POPULER_MARKALAR.slice(0, 9).map(m => (
                       <button
                         key={m}
                         type="button"
@@ -313,40 +543,40 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Seri Numarası / IMEI</label>
+                  <label className="form-label">Seri No / IMEI / Mac Adresi</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Cihaz altındaki seri no veya IMEI"
+                    placeholder="Seri numarası veya Mac adresi"
                     value={seriNoImei}
                     onChange={e => setSeriNoImei(e.target.value)}
                   />
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">PIN / Giriş Şifresi</label>
+                  <label className="form-label">Sistem Şifresi / PIN / Port</label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Windows şifresi veya telefon PIN"
+                    placeholder="NVR/Router şifresi veya Windows PIN"
                     value={cihazSifresi}
                     onChange={e => setCihazSifresi(e.target.value)}
                   />
                 </div>
               </div>
 
-              {/* 3x3 Dokunmatik Desen Kilidi Seçeneği */}
-              <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Grid size={15} /> 3x3 Dokunmatik Kilit Deseni (Android)
+              {/* Android Desen Kilidi (İhtiyaç Halinde) */}
+              <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Grid size={14} /> Android 3x3 Kilit Deseni (Mobil/Tablet için)
                   </span>
                   <button
                     type="button"
                     className="btn btn-secondary btn-sm"
                     onClick={() => setShowPatternLock(!showPatternLock)}
                   >
-                    {showPatternLock ? 'Deseni Kapat' : 'Desen Çiz / Düzenle'}
+                    {showPatternLock ? 'Kapat' : 'Desen Çiz'}
                   </button>
                 </div>
 
@@ -355,181 +585,31 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                     <PatternLock
                       value={kilitDeseni}
                       onChange={pts => setKilitDeseni(pts)}
-                      size={200}
+                      size={180}
                     />
                   </div>
                 )}
               </div>
             </div>
 
-            {/* 3. Bölüm: Fiziksel Kontroller ve Aksesuarlar */}
-            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
-              <h4 style={{ fontSize: '14px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <CheckSquare size={16} /> 3. Teslim Alınan Aksesuarlar & Fiziksel Durum
-              </h4>
-
-              {/* Aksesuar Seçim Çipleri */}
-              <div style={{ marginBottom: '16px' }}>
-                <label className="form-label">Birlikte Teslim Alınan Aksesuarlar:</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {STANDART_AKSESUARLAR.map(aks => {
-                    const isSelected = secilenAksesuarlar.includes(aks);
-                    return (
-                      <button
-                        key={aks}
-                        type="button"
-                        onClick={() => toggleAksesuar(aks)}
-                        style={{
-                          fontSize: '12px',
-                          padding: '6px 12px',
-                          borderRadius: '8px',
-                          background: isSelected ? 'var(--accent-gradient)' : 'rgba(255, 255, 255, 0.05)',
-                          color: isSelected ? '#fff' : '#94a3b8',
-                          border: isSelected ? 'none' : '1px solid var(--border-color)',
-                          cursor: 'pointer',
-                          fontWeight: isSelected ? 600 : 400,
-                          transition: 'all 0.15s ease',
-                        }}
-                      >
-                        {isSelected ? '✓ ' : '+ '}{aks}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div style={{ marginTop: '8px' }}>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Diğer teslim alınan aksesuarlar (opsiyonel)..."
-                    value={aksesuarDiger}
-                    onChange={e => setAksesuarDiger(e.target.value)}
-                    style={{ height: '34px', fontSize: '12px' }}
-                  />
-                </div>
-              </div>
-
-              {/* Fiziksel Hasar Kontrol Kutuları */}
-              <div style={{ marginBottom: '14px' }}>
-                <label className="form-label">Girişteki Fiziksel Kusur & Hasar Durumu:</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
-                  {ON_HAZIR_FIZIKSEL_KONTROLLER.map(item => {
-                    const isChecked = !!fizikselKontroller[item.id];
-                    return (
-                      <label
-                        key={item.id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '8px',
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          background: isChecked ? 'rgba(239, 68, 68, 0.15)' : 'rgba(0,0,0,0.2)',
-                          border: isChecked ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid var(--border-color)',
-                          fontSize: '12px',
-                          color: isChecked ? '#f87171' : '#cbd5e1',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleFiziksel(item.id)}
-                          style={{ accentColor: '#ef4444' }}
-                        />
-                        <span>{item.label}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label">Fiziksel Durum Ek Notu</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Örn: Kasada sol altta hafif çatlak var, menteşe sert açılıyor."
-                  value={fizikselDurumNotu}
-                  onChange={e => setFizikselDurumNotu(e.target.value)}
-                />
-              </div>
-
-              {/* Fotoğraf Yükleme */}
-              <div style={{ marginTop: '14px' }}>
-                <label className="form-label">Cihaz Giriş / Hasar Fotoğrafları</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  <label
-                    className="btn btn-secondary btn-sm"
-                    style={{ cursor: 'pointer', display: 'inline-flex' }}
-                  >
-                    <Camera size={16} /> Fotoğraf Çek / Ekle
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      capture="environment"
-                      style={{ display: 'none' }}
-                      onChange={handlePhotoUpload}
-                    />
-                  </label>
-                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-                    {fotograflar.length} fotoğraf eklendi
-                  </span>
-                </div>
-
-                {fotograflar.length > 0 && (
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
-                    {fotograflar.map((img, idx) => (
-                      <div key={idx} style={{ position: 'relative' }}>
-                        <img
-                          src={img}
-                          alt="Cihaz"
-                          style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #38bdf8' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setFotograflar(prev => prev.filter((_, i) => i !== idx))}
-                          style={{
-                            position: 'absolute',
-                            top: '-4px',
-                            right: '-4px',
-                            background: '#ef4444',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '18px',
-                            height: '18px',
-                            fontSize: '10px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* 4. Bölüm: Arıza Tanımı, Teknisyen ve Kapora */}
-            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
-              <h4 style={{ fontSize: '14px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                <FileText size={16} /> 4. Arıza / Şikayet & Servis Önceliği
+            {/* 4. Bölüm: Arıza & Montaj Talebi & Aksesuarlar */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <h4 style={{ fontSize: '13px', color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: 700 }}>
+                <FileText size={16} /> 4. Arıza / Talep / Montaj Detayı & Şikayet
               </h4>
 
               <div className="form-group">
-                <label className="form-label">Müşteri Şikayeti / Bildirilen Arıza *</label>
+                <label className="form-label">Müşteri Talebi / Arıza Açıklaması *</label>
                 <textarea
                   required
                   className="form-control"
                   rows={3}
-                  placeholder="Müşterinin belirttiği arıza detayları..."
+                  placeholder="Yapılacak montaj, arıza tespiti veya teklif detaylarını yazınız..."
                   value={arizaTanimi}
                   onChange={e => setArizaTanimi(e.target.value)}
                 />
-                {/* Hazır Arıza Şablonları */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                {/* Hazır Arıza/Montaj Şablonları */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '6px' }}>
                   {STANDART_ARIZALAR.slice(0, 6).map(ariza => (
                     <button
                       key={ariza}
@@ -551,9 +631,72 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+              {/* Aksesuarlar */}
+              <div style={{ marginBottom: '12px' }}>
+                <label className="form-label">Teslim Alınan Parça & Ekipmanlar:</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {STANDART_AKSESUARLAR.map(aks => {
+                    const isSelected = secilenAksesuarlar.includes(aks);
+                    return (
+                      <button
+                        key={aks}
+                        type="button"
+                        onClick={() => toggleAksesuar(aks)}
+                        style={{
+                          fontSize: '11px',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          background: isSelected ? 'var(--accent-gradient)' : 'rgba(255, 255, 255, 0.05)',
+                          color: isSelected ? '#fff' : '#94a3b8',
+                          border: isSelected ? 'none' : '1px solid var(--border-color)',
+                          cursor: 'pointer',
+                          fontWeight: isSelected ? 700 : 400,
+                        }}
+                      >
+                        {isSelected ? '✓ ' : '+ '}{aks}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ marginTop: '8px' }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Diğer teslim alınan aksesuarlar (opsiyonel)..."
+                    value={aksesuarDiger}
+                    onChange={e => setAksesuarDiger(e.target.value)}
+                    style={{ height: '34px', fontSize: '12px' }}
+                  />
+                </div>
+              </div>
+
+              {/* Fotoğraf Ekleme */}
+              <div>
+                <label className="form-label">Saha / Keşif / Cihaz Fotoğrafları</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <label className="btn btn-secondary btn-sm" style={{ cursor: 'pointer' }}>
+                    <Camera size={14} /> Fotoğraf Çek / Yükle
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      capture="environment"
+                      style={{ display: 'none' }}
+                      onChange={handlePhotoUpload}
+                    />
+                  </label>
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    {fotograflar.length} fotoğraf eklendi
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 5. Bölüm: Teknisyen & Kapora */}
+            <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Atanan Teknisyen</label>
+                  <label className="form-label">Sorumlu Teknisyen / Uzman</label>
                   <select
                     className="form-control"
                     value={atananTeknisyenId}
@@ -568,7 +711,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Öncelik Seviyesi</label>
+                  <label className="form-label">Öncelik</label>
                   <select
                     className="form-control"
                     value={oncelik}
@@ -576,7 +719,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                   >
                     <option value="Normal">Normal</option>
                     <option value="Acil">Acil (Öncelikli)</option>
-                    <option value="Kritik">Kritik (Aynı Gün Teslim)</option>
+                    <option value="Kritik">Kritik (Aynı Gün / OSB)</option>
                   </select>
                 </div>
 
@@ -585,7 +728,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
                   <input
                     type="number"
                     min="0"
-                    step="50"
+                    step="100"
                     className="form-control"
                     placeholder="0.00"
                     value={alinanKapora || ''}
@@ -595,15 +738,15 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
 
                 {alinanKapora > 0 && (
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Kapora Ödeme Türü</label>
+                    <label className="form-label">Kapora Ödeme Kanalı</label>
                     <select
                       className="form-control"
                       value={odemeTuru}
                       onChange={e => setOdemeTuru(e.target.value as OdemeTuru)}
                     >
                       <option value="Nakit">Nakit</option>
-                      <option value="KrediKarti">Kredi Kartı</option>
-                      <option value="HavaleEFT">Havale / EFT</option>
+                      <option value="KrediKarti">Kredi Kartı / POS</option>
+                      <option value="HavaleEFT">Banka Havale / EFT</option>
                     </select>
                   </div>
                 )}
@@ -623,7 +766,7 @@ export const NewServiceModal: React.FC<NewServiceModalProps> = ({
               type="submit"
               className="btn btn-primary"
             >
-              <Save size={18} /> Cihazı Kabul Et & Kaydet
+              <Save size={18} /> Kaydet & Fiş Oluştur
             </button>
           </div>
         </form>

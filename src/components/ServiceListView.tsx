@@ -12,11 +12,21 @@ import {
   ChevronRight,
   User,
   Smartphone,
+  Truck,
+  Store,
+  MapPin,
+  Calendar,
+  Wrench,
+  Video,
+  BellRing,
+  Network,
+  Flame,
+  Code2,
 } from 'lucide-react';
 import { useServices } from '../context/ServiceContext';
-import { DURUMLAR } from '../lib/constants';
+import { DURUMLAR, FAALIYET_ALANLARI, ISLEM_TURLERI } from '../lib/constants';
 import { formatMoney, formatDateTime, buildWhatsAppLink } from '../lib/format';
-import type { TeknikServisItem, TeknikServisDurumu } from '../types';
+import type { TeknikServisItem, TeknikServisDurumu, ServisTuru, FaaliyetAlani } from '../types';
 
 interface ServiceListViewProps {
   searchQuery: string;
@@ -33,7 +43,8 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
 }) => {
   const { services, updateServiceStatus } = useServices();
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [deviceFilter, setDeviceFilter] = useState<string>('ALL');
+  const [servisTuruFilter, setServisTuruFilter] = useState<string>('ALL');
+  const [faaliyetFilter, setFaaliyetFilter] = useState<string>('ALL');
 
   // Filtreleme
   const filtered = services.filter(item => {
@@ -44,6 +55,7 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
       item.musteriTelefon.includes(q) ||
       item.markaModel.toLowerCase().includes(q) ||
       item.seriNoImei.toLowerCase().includes(q) ||
+      (item.sahaAdresi && item.sahaAdresi.toLowerCase().includes(q)) ||
       (item.atananTeknisyenAd && item.atananTeknisyenAd.toLowerCase().includes(q));
 
     const matchStatus =
@@ -53,9 +65,10 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
         ? !['TeslimEdildi', 'IptalIade'].includes(item.durum)
         : item.durum === statusFilter;
 
-    const matchDevice = deviceFilter === 'ALL' ? true : item.cihazTipi.includes(deviceFilter);
+    const matchTuru = servisTuruFilter === 'ALL' ? true : item.servisTuru === servisTuruFilter;
+    const matchFaaliyet = faaliyetFilter === 'ALL' ? true : item.faaliyetAlani === faaliyetFilter;
 
-    return matchSearch && matchStatus && matchDevice;
+    return matchSearch && matchStatus && matchTuru && matchFaaliyet;
   });
 
   const selectedItem = services.find(s => s.id === selectedServiceId) || filtered[0];
@@ -63,14 +76,14 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
   const handleWhatsAppNotify = (item: TeknikServisItem, e: React.MouseEvent) => {
     e.stopPropagation();
     let msg = '';
-    if (item.durum === 'KabulEdildi') {
-      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} cihazınız ${item.servisNo} takip numarası ile servisimize kabul edilmiştir. Cihazınızı sorgulamak için servis numaranızı kullanabilirsiniz. — Gördit Bilgisayar`;
-    } else if (item.durum === 'OnayBekliyor') {
-      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} cihazınızın teknik incelemesi tamamlanmıştır. Toplam onarım tutarı: ${formatMoney(item.toplamTutar)} TL'dir. İşleme devam etmek için onayınızı rica ederiz. — Gördit Bilgisayar`;
+    if (item.islemTuru === 'Teklif') {
+      msg = `Sayın ${item.musteriAdSoyad}, talep ettiğiniz ${item.markaModel} projesi için fiyat teklifimiz hazırlanmıştır. Teklif tutarı: ${formatMoney(item.toplamTutar)} TL'dir. — Gördit Bilgisayar`;
+    } else if (item.servisTuru === 'DisServis' && item.durum === 'Tamirde') {
+      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} saha montaj ve kurulum ekibimiz randevu saatinizde adresinize hareket edecektir. — Gördit Bilgisayar`;
     } else if (item.durum === 'Tamamlandi') {
-      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} cihazınızın onarımı başarıyla tamamlanmıştır. Servisimizden teslim alabilirsiniz. Kalan bakiye: ${formatMoney(item.kalanTutar)}. — Gördit Bilgisayar`;
+      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} cihazınızın / sisteminizin işlemleri başarıyla tamamlanmıştır. Kalan bakiye: ${formatMoney(item.kalanTutar)}. — Gördit Bilgisayar`;
     } else {
-      msg = `Sayın ${item.musteriAdSoyad}, ${item.servisNo} nolu ${item.markaModel} cihazınızın güncel servis durumu: ${DURUMLAR[item.durum]?.label}. — Gördit Bilgisayar`;
+      msg = `Sayın ${item.musteriAdSoyad}, ${item.servisNo} takip numaralı ${item.markaModel} servis durumu: '${DURUMLAR[item.durum]?.label}'. — Gördit Bilgisayar`;
     }
     window.open(buildWhatsAppLink(item.musteriTelefon, msg), '_blank');
   };
@@ -95,6 +108,35 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
             <span>Filtre:</span>
           </div>
 
+          {/* İç / Dış Servis Filtresi */}
+          <select
+            className="form-control"
+            style={{ width: 'auto', height: '36px', fontSize: '13px', fontWeight: 600 }}
+            value={servisTuruFilter}
+            onChange={e => setServisTuruFilter(e.target.value)}
+          >
+            <option value="ALL">Tüm Lokasyonlar (İç & Dış)</option>
+            <option value="IcServis">🏠 Yalnızca İç Servis (Atölye)</option>
+            <option value="DisServis">🚛 Yalnızca Dış Servis (Saha / Montaj)</option>
+          </select>
+
+          {/* Faaliyet Alanı Filtresi */}
+          <select
+            className="form-control"
+            style={{ width: 'auto', height: '36px', fontSize: '13px' }}
+            value={faaliyetFilter}
+            onChange={e => setFaaliyetFilter(e.target.value)}
+          >
+            <option value="ALL">Tüm Sektörler / Faaliyetler</option>
+            <option value="GuvenlikKamerasi">📹 Güvenlik Kamerası (CCTV)</option>
+            <option value="AlarmSistemi">🚨 Hırsız Alarm Sistemi</option>
+            <option value="Bilgisayar">💻 Bilgisayar & Donanım & Sunucu</option>
+            <option value="Network">🌐 Network & Ağ & Kablolama</option>
+            <option value="YanginAlarm">🔥 Yangın Alarm & İhbar</option>
+            <option value="Yazilim">💻 Yazılım & Muhasebe & SQL</option>
+          </select>
+
+          {/* Durum Filtresi */}
           <select
             className="form-control"
             style={{ width: 'auto', height: '36px', fontSize: '13px' }}
@@ -102,26 +144,12 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
             onChange={e => setStatusFilter(e.target.value)}
           >
             <option value="ALL">Tüm Durumlar ({services.length})</option>
-            <option value="ACTIVE">Yalnızca Aktif Cihazlar</option>
+            <option value="ACTIVE">Yalnızca Devam Edenler</option>
             {Object.entries(DURUMLAR).map(([key, meta]) => (
               <option key={key} value={key}>
                 {meta.label} ({services.filter(s => s.durum === key).length})
               </option>
             ))}
-          </select>
-
-          <select
-            className="form-control"
-            style={{ width: 'auto', height: '36px', fontSize: '13px' }}
-            value={deviceFilter}
-            onChange={e => setDeviceFilter(e.target.value)}
-          >
-            <option value="ALL">Tüm Cihaz Tipleri</option>
-            <option value="Laptop">Laptop / Dizüstü</option>
-            <option value="Bilgisayar">Masaüstü PC</option>
-            <option value="Telefon">Telefon</option>
-            <option value="Tablet">Tablet</option>
-            <option value="Yazıcı">Yazıcı / Tarayıcı</option>
           </select>
         </div>
 
@@ -134,8 +162,9 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
       <div className="tablet-split-layout">
         {/* Sol Liste Paneli */}
         <div className="split-list-panel">
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: '14px' }}>
-            Servis Kayıtları
+          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Servis & Montaj Kayıtları</span>
+            <span style={{ fontSize: '11px', color: '#94a3b8' }}>{filtered.length} Adet</span>
           </div>
 
           <div style={{ overflowY: 'auto', flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -146,7 +175,10 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
             ) : (
               filtered.map(item => {
                 const meta = DURUMLAR[item.durum] || DURUMLAR.KabulEdildi;
+                const faalMeta = FAALIYET_ALANLARI[item.faaliyetAlani] || FAALIYET_ALANLARI.Bilgisayar;
                 const isSelected = selectedItem?.id === item.id;
+                const isDisServis = item.servisTuru === 'DisServis';
+
                 return (
                   <div
                     key={item.id}
@@ -154,31 +186,54 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                     style={{
                       padding: '14px',
                       borderRadius: '12px',
-                      background: isSelected ? 'rgba(2, 132, 199, 0.18)' : 'var(--bg-card)',
-                      border: isSelected ? '1px solid var(--accent)' : '1px solid var(--border-color)',
+                      background: isSelected ? 'rgba(227, 6, 19, 0.12)' : 'var(--bg-card)',
+                      border: isSelected ? '1px solid var(--logo-red)' : '1px solid var(--border-color)',
                       cursor: 'pointer',
                       transition: 'all 0.18s ease',
                       position: 'relative',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontWeight: 800, fontSize: '13px', color: '#fff' }}>
-                        {item.servisNo}
-                      </span>
-                      <span className={`badge ${meta.badgeClass}`} style={{ fontSize: '11px', padding: '2px 8px' }}>
+                    {/* Üst Bilgi Satırı: Servis No, İç/Dış Etiketi, Durum Rozeti */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontWeight: 800, fontSize: '13px', color: '#fff' }}>
+                          {item.servisNo}
+                        </span>
+                        {/* İç / Dış Servis Rozeti */}
+                        <span className={`badge ${isDisServis ? 'badge-dis-servis' : 'badge-ic-servis'}`} style={{ fontSize: '10px', padding: '1px 6px' }}>
+                          {isDisServis ? <Truck size={10} /> : <Store size={10} />}
+                          {isDisServis ? 'Saha' : 'Atölye'}
+                        </span>
+                      </div>
+
+                      <span className={`badge ${meta.badgeClass}`} style={{ fontSize: '10px', padding: '2px 7px' }}>
                         {meta.label}
                       </span>
                     </div>
 
-                    <div style={{ fontWeight: 600, fontSize: '14px', color: 'var(--text-main)' }}>
+                    <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-main)' }}>
                       {item.musteriAdSoyad}
                     </div>
 
-                    <div style={{ fontSize: '12px', color: '#38bdf8', marginTop: '2px' }}>
-                      {item.markaModel}
+                    {/* Faaliyet Alanı & Cihaz */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#38bdf8', marginTop: '3px' }}>
+                      <span className={`badge ${faalMeta.badge}`} style={{ fontSize: '9px', padding: '1px 5px' }}>
+                        {faalMeta.label.split(' ')[0]}
+                      </span>
+                      <span>{item.markaModel}</span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', fontSize: '12px', color: '#94a3b8' }}>
+                    {/* Dış Servis Saha Adresi Varsa */}
+                    {isDisServis && item.sahaAdresi && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#ff6b72', marginTop: '4px' }}>
+                        <MapPin size={12} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.sahaAdresi}
+                        </span>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#94a3b8' }}>
                       <span>{item.musteriTelefon}</span>
                       <strong style={{ color: item.kalanTutar > 0 ? '#fb7185' : '#34d399' }}>
                         {item.kalanTutar > 0 ? `Kalan: ${formatMoney(item.kalanTutar)}` : 'Ödendi'}
@@ -215,7 +270,7 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                         className="btn btn-whatsapp btn-sm"
                         style={{ height: '28px', padding: '0 8px' }}
                         onClick={e => handleWhatsAppNotify(item, e)}
-                        title="WhatsApp ile Müşteriye Bildir"
+                        title="WhatsApp Bildir"
                       >
                         <MessageCircle size={13} />
                       </button>
@@ -236,21 +291,24 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
           </div>
         </div>
 
-        {/* Sağ Detay Paneli (Tablet ve Masaüstünde Geniş Detay İnceleme) */}
+        {/* Sağ Detay Paneli */}
         <div className="split-detail-panel">
           {selectedItem ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Başlık ve Durum */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              {/* Başlık ve Rozetler */}
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <h2 style={{ fontSize: '22px', fontWeight: 800 }}>{selectedItem.servisNo}</h2>
+                    <span className={`badge ${selectedItem.servisTuru === 'DisServis' ? 'badge-dis-servis' : 'badge-ic-servis'}`}>
+                      {selectedItem.servisTuru === 'DisServis' ? 'Dış Servis / Saha' : 'İç Servis / Atölye'}
+                    </span>
                     <span className={`badge ${DURUMLAR[selectedItem.durum]?.badgeClass}`}>
                       {DURUMLAR[selectedItem.durum]?.label}
                     </span>
                   </div>
-                  <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '2px' }}>
-                    Geliş Tarihi: {formatDateTime(selectedItem.gelisTarihi)}
+                  <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '3px' }}>
+                    Faaliyet: {FAALIYET_ALANLARI[selectedItem.faaliyetAlani]?.label} | İşlem: {ISLEM_TURLERI[selectedItem.islemTuru]?.label}
                   </p>
                 </div>
 
@@ -275,46 +333,73 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                 </div>
               </div>
 
+              {/* Dış Servis Saha Kartı (Varsa) */}
+              {selectedItem.servisTuru === 'DisServis' && (
+                <div style={{ background: 'rgba(227, 6, 19, 0.12)', border: '1px solid rgba(227, 6, 19, 0.35)', borderRadius: '12px', padding: '14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff6b72', fontWeight: 700, fontSize: '13px', marginBottom: '8px' }}>
+                    <Truck size={16} /> Saha Montaj & Keşif Bilgileri
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '12px' }}>
+                    <div>
+                      <strong style={{ color: '#cbd5e1' }}>Saha Adresi:</strong>
+                      <div style={{ color: '#fff' }}>{selectedItem.sahaAdresi || selectedItem.musteriAdres || 'Belirtilmedi'}</div>
+                    </div>
+                    <div>
+                      <strong style={{ color: '#cbd5e1' }}>Randevu Zamanı:</strong>
+                      <div style={{ color: '#fff' }}>{formatDateTime(selectedItem.sahaRandevuTarihi) || 'Planlanmadı'}</div>
+                    </div>
+                    <div>
+                      <strong style={{ color: '#cbd5e1' }}>Saha Ekibi:</strong>
+                      <div style={{ color: '#fff' }}>{selectedItem.sahaEkibi || selectedItem.atananTeknisyenAd || 'Atanmadı'}</div>
+                    </div>
+                    {selectedItem.sahaNotu && (
+                      <div style={{ gridColumn: 'span 2' }}>
+                        <strong style={{ color: '#cbd5e1' }}>Saha Notu:</strong>
+                        <div style={{ color: '#ff6b72' }}>{selectedItem.sahaNotu}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Müşteri & Cihaz Bilgi Kartı */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
-                <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', marginBottom: '8px', fontWeight: 700, fontSize: '13px' }}>
-                    <User size={16} />
-                    Müşteri Bilgileri
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', marginBottom: '6px', fontWeight: 700, fontSize: '13px' }}>
+                    <User size={16} /> Müşteri / Firma
                   </div>
                   <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{selectedItem.musteriAdSoyad}</div>
-                  <div style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '4px' }}>Tel: {selectedItem.musteriTelefon}</div>
+                  <div style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '2px' }}>Tel: {selectedItem.musteriTelefon}</div>
                   {selectedItem.musteriEmail && <div style={{ fontSize: '12px', color: '#94a3b8' }}>{selectedItem.musteriEmail}</div>}
-                  {selectedItem.musteriAdres && <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{selectedItem.musteriAdres}</div>}
+                  {selectedItem.musteriAdres && <div style={{ fontSize: '12px', color: '#94a3b8' }}>{selectedItem.musteriAdres}</div>}
                 </div>
 
-                <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', marginBottom: '8px', fontWeight: 700, fontSize: '13px' }}>
-                    <Smartphone size={16} />
-                    Cihaz Bilgileri
+                <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', marginBottom: '6px', fontWeight: 700, fontSize: '13px' }}>
+                    <Smartphone size={16} /> Sistem / Donanım
                   </div>
                   <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{selectedItem.markaModel}</div>
-                  <div style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '4px' }}>Tip: {selectedItem.cihazTipi}</div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>Seri/IMEI: {selectedItem.seriNoImei}</div>
-                  {selectedItem.cihazSifresi && <div style={{ fontSize: '12px', color: '#f59e0b' }}>PIN/Şifre: {selectedItem.cihazSifresi}</div>}
+                  <div style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '2px' }}>Tür: {selectedItem.cihazTipi}</div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>Seri/IMEI/Mac: {selectedItem.seriNoImei}</div>
+                  {selectedItem.cihazSifresi && <div style={{ fontSize: '12px', color: '#f59e0b' }}>Şifre / Port: {selectedItem.cihazSifresi}</div>}
                 </div>
               </div>
 
               {/* Şikayet ve Yapılan İşlemler */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: 700, fontSize: '13px', color: '#f87171', marginBottom: '6px' }}>
-                  Arıza & Şikayet Tanımı:
+              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontWeight: 700, fontSize: '13px', color: '#ff6b72', marginBottom: '4px' }}>
+                  Arıza / Montaj / Teklif Talebi:
                 </div>
-                <div style={{ fontSize: '14px', color: '#e2e8f0', background: 'rgba(0,0,0,0.2)', padding: '10px 12px', borderRadius: '8px' }}>
+                <div style={{ fontSize: '13px', color: '#e2e8f0', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: '8px' }}>
                   {selectedItem.arizaTanimi}
                 </div>
 
                 {selectedItem.yapilanIslemler && (
-                  <div style={{ marginTop: '12px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '13px', color: '#34d399', marginBottom: '6px' }}>
-                      Teknisyen İnceleme & Yapılan İşlemler:
+                  <div style={{ marginTop: '10px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '13px', color: '#34d399', marginBottom: '4px' }}>
+                      Yapılan İşlemler & Saha Raporu:
                     </div>
-                    <div style={{ fontSize: '14px', color: '#e2e8f0', background: 'rgba(0,0,0,0.2)', padding: '10px 12px', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '13px', color: '#e2e8f0', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: '8px' }}>
                       {selectedItem.yapilanIslemler}
                     </div>
                   </div>
@@ -322,9 +407,9 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
               </div>
 
               {/* Finansal Kalemler & Bakiye */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: 700, fontSize: '13px', color: '#38bdf8', marginBottom: '10px' }}>
-                  Servis İşçilik & Yedek Parça Kalemleri
+              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontWeight: 700, fontSize: '13px', color: '#38bdf8', marginBottom: '8px' }}>
+                  Montaj & Parça & İşçilik Kalemleri
                 </div>
 
                 <div className="data-table-container">
@@ -332,7 +417,7 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                     <thead>
                       <tr>
                         <th>Tür</th>
-                        <th>Açıklama</th>
+                        <th>Kalem Açıklaması</th>
                         <th>Adet</th>
                         <th>Birim</th>
                         <th>Toplam</th>
@@ -362,17 +447,17 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                   </table>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
-                  <div style={{ width: '280px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+                  <div style={{ width: '280px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
-                      <span>Genel Toplam:</span>
+                      <span>Toplam Tutar:</span>
                       <strong style={{ color: '#fff' }}>{formatMoney(selectedItem.toplamTutar)}</strong>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
                       <span>Alınan Kapora:</span>
                       <strong style={{ color: '#34d399' }}>{formatMoney(selectedItem.alinanKapora)}</strong>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', borderTop: '1px solid var(--border-color)', paddingTop: '6px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', borderTop: '1px solid var(--border-color)', paddingTop: '4px' }}>
                       <span style={{ fontWeight: 700 }}>Kalan Bakiye:</span>
                       <strong style={{ color: selectedItem.kalanTutar > 0 ? '#fb7185' : '#34d399' }}>
                         {formatMoney(selectedItem.kalanTutar)}
@@ -382,9 +467,9 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                 </div>
               </div>
 
-              {/* Hızlı Durum İlerletme Çubuğu */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 600 }}>Durum Değiştir:</span>
+              {/* Hızlı Durum Değiştirme */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 700 }}>Durum:</span>
                 {(['Incelemede', 'OnayBekliyor', 'Tamirde', 'Tamamlandi', 'TeslimEdildi'] as TeknikServisDurumu[]).map(st => (
                   <button
                     key={st}
@@ -399,7 +484,7 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
             </div>
           ) : (
             <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
-              İncelemek için sol taraftan bir servis seçin.
+              İncelemek için sol taraftan bir kayıt seçin.
             </div>
           )}
         </div>
