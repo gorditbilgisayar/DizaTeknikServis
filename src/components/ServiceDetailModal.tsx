@@ -22,7 +22,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { useServices } from '../context/ServiceContext';
-import { DURUMLAR } from '../lib/constants';
+import { DURUMLAR, FAALIYET_ALANLARI } from '../lib/constants';
 import { formatMoney, buildWhatsAppLink } from '../lib/format';
 import { PatternLock } from './PatternLock';
 import type { TeknikServisItem, TeknikServisDurumu } from '../types';
@@ -133,8 +133,8 @@ export const ServiceDetailModal: React.FC<ServiceDetailModalProps> = ({
                 <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--diza-navy)' }}>
                   {service.servisNo}
                 </h3>
-                <span className={`badge ${service.servisTuru === 'DisServis' ? 'badge-danger' : 'badge-primary'}`}>
-                  {service.servisTuru === 'DisServis' ? '🚛 Dış (Saha)' : '🏠 İç (Atölye)'}
+                <span className={`badge ${FAALIYET_ALANLARI[service.faaliyetAlani]?.badge || 'badge-primary'}`}>
+                  {FAALIYET_ALANLARI[service.faaliyetAlani]?.label}
                 </span>
                 <span className={`badge ${currentMeta.badgeClass}`}>
                   {currentMeta.label}

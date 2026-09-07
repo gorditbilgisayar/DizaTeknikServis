@@ -13,7 +13,7 @@ import {
   generateBarcodeSvg,
   generateQrCodeSvg,
 } from '../lib/format';
-import { DURUMLAR } from '../lib/constants';
+import { DURUMLAR, FAALIYET_ALANLARI } from '../lib/constants';
 import type { TeknikServisItem } from '../types';
 
 interface PrintModalProps {
@@ -137,12 +137,10 @@ export const PrintModal: React.FC<PrintModalProps> = ({
                     <div style={{ fontSize: '14px', fontWeight: 900, color: '#1a237e', textTransform: 'uppercase' }}>
                       {service.islemTuru === 'Teklif'
                         ? 'FİYAT TEKLİFİ & PROJE FORMU'
-                        : service.servisTuru === 'DisServis'
-                        ? 'SAHA MONTAJ & SERVİS TUTANAĞI'
-                        : 'ATÖLYE SERVİS KABUL FORMU'}
+                        : 'TEKNİK SERVİS FORMU'}
                     </div>
                     <div style={{ fontSize: '11px', color: '#e30613', fontWeight: 700, marginTop: '2px' }}>
-                      {service.servisTuru === 'DisServis' ? '🚛 DIŞ SERVİS (SAHA)' : '🏠 İÇ SERVİS (ATÖLYE)'}
+                      {FAALIYET_ALANLARI[service.faaliyetAlani]?.label || 'TEKNİK SERVİS'}
                     </div>
                     <div style={{ marginTop: '4px' }} dangerouslySetInnerHTML={{ __html: barcodeSvg }} />
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>

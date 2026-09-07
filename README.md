@@ -1,32 +1,18 @@
-# React + TypeScript + Vite
+# Diza Teknik Servis — Gördit Bilgisayar (v1.3.0)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+**Diza Teknik Servis**, Kamera Sistemleri, Yangın & Hırsız Alarmı, Bilgisayar & Donanım, Network ve Ticari Yazılım süreçleri için geliştirilmiş modern teknik servis ve müşteri yönetim sistemidir.
 
-Currently, two official plugins are available:
+- **Tek Yasal Hak Sahibi:** Gördit Bilgisayar — Zafer GÖRGÜN
+- **Versiyon:** `v1.3.0`
+- **Telif:** Copyright © 2024-2026 Gördit Bilgisayar. Tüm hakları saklıdır.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## v1.3.0 Yenilikleri
+- **Yeni Servis Kaydı Formu Sadeleştirildi:** İç ve Dış servis ayrımı kaldırılarak doğrudan tek tip Servis Kaydı yapısına geçildi.
+- **Odaklı Form Alanları:**
+  - Adı Soyadı ve / veya Firma Adı
+  - Standart Maskeli Telefon Numarası (`0(XXX) XXX XX XX`)
+  - Açık Adres
+  - E-Posta (Mail)
+  - Servis Türü (Kamera, Alarm, Bilgisayar, Network, Yangın Alarm, Yazılım)
+  - Müşteri Şikayeti / Arıza Tanımı
+- **Görünüm İyileştirmeleri:** Panel, servis listesi, kanban ve yazdırma fişlerinde Servis Türü etiketleri öne çıkarıldı.

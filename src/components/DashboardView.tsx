@@ -37,12 +37,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 }) => {
   const { services, cashMoves } = useServices();
 
-  const icServisCount = services.filter(
-    s => s.servisTuru === 'IcServis' && !['TeslimEdildi', 'IptalIade'].includes(s.durum)
+  const aktifServisCount = services.filter(
+    s => !['TeslimEdildi', 'IptalIade'].includes(s.durum)
   ).length;
 
-  const disServisCount = services.filter(
-    s => s.servisTuru === 'DisServis' && !['TeslimEdildi', 'IptalIade'].includes(s.durum)
+  const islemdekiCount = services.filter(
+    s => ['Incelemede', 'Tamirde', 'ParcaBekliyor'].includes(s.durum)
   ).length;
 
   const teklifCount = services.filter(s => s.islemTuru === 'Teklif').length;
@@ -76,7 +76,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             Diza Teknik Servis Yönetim Paneli
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '2px' }}>
-            İç Servis (Atölye), Dış Servis (Saha/Montaj), Güvenlik Kamerası, Alarm ve Yangın Sistemleri
+            Güvenlik Kamerası, Alarm, Yangın, Bilgisayar, Network ve Yazılım Servis Yönetimi
           </p>
         </div>
 
@@ -87,39 +87,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           onClick={onOpenNewService}
         >
           <Plus size={20} />
-          <span>+ YENİ SERVİS / MONTAJ KAYDI</span>
+          <span>+ YENİ SERVİS KAYDI</span>
         </button>
       </div>
 
       {/* Sade ve Net 5 Ana Diza Karosu */}
       <div className="kpi-grid">
-        {/* 1. İç Servis */}
+        {/* 1. Aktif Servisler */}
         <div
           className="kpi-card"
           onClick={() => onGoToTab('services')}
           style={{ cursor: 'pointer', borderTop: '3px solid var(--diza-navy)' }}
         >
           <div className="kpi-icon-box" style={{ background: '#e8eaf6', color: 'var(--diza-navy)' }}>
-            <Store size={22} />
+            <Wrench size={22} />
           </div>
           <div className="kpi-info">
-            <h4>İç Servis (Atölye)</h4>
-            <div className="kpi-val" style={{ color: 'var(--diza-navy)' }}>{icServisCount}</div>
+            <h4>Aktif Servisler</h4>
+            <div className="kpi-val" style={{ color: 'var(--diza-navy)' }}>{aktifServisCount}</div>
           </div>
         </div>
 
-        {/* 2. Dış Servis / Saha */}
+        {/* 2. İşlemde / Tamirde */}
         <div
           className="kpi-card"
           onClick={() => onGoToTab('services')}
           style={{ cursor: 'pointer', borderTop: '3px solid var(--diza-red)' }}
         >
           <div className="kpi-icon-box" style={{ background: 'var(--diza-red-light)', color: 'var(--diza-red)' }}>
-            <Truck size={22} />
+            <Clock size={22} />
           </div>
           <div className="kpi-info">
-            <h4>Dış Servis (Saha / Montaj)</h4>
-            <div className="kpi-val" style={{ color: 'var(--diza-red)' }}>{disServisCount}</div>
+            <h4>İşlemde / Onarımda</h4>
+            <div className="kpi-val" style={{ color: 'var(--diza-red)' }}>{islemdekiCount}</div>
           </div>
         </div>
 
@@ -209,7 +209,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <tr>
                 <th>Servis No</th>
                 <th>Servis Türü</th>
-                <th>Sektör / Faaliyet</th>
                 <th>Müşteri / Firma</th>
                 <th>Cihaz / Sistem Modeli</th>
                 <th>Durum</th>
@@ -220,7 +219,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <tbody>
               {recentServices.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
                     Henüz kayıtlı bir servis bulunmamaktadır.
                   </td>
                 </tr>
@@ -241,18 +240,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </strong>
                       </td>
                       <td>
-                        {item.servisTuru === 'DisServis' ? (
-                          <span className="badge badge-info" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <Truck size={12} /> Dış (Saha)
-                          </span>
-                        ) : (
-                          <span className="badge badge-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <Store size={12} /> İç (Atölye)
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        <span style={{ fontSize: '12px', color: 'var(--text-main)', fontWeight: 500 }}>
+                        <span className={`badge ${faal?.badge || 'badge-primary'}`} style={{ fontSize: '11px' }}>
                           {faal?.label || item.faaliyetAlani}
                         </span>
                       </td>

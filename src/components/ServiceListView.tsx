@@ -38,7 +38,6 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
 }) => {
   const { services, updateServiceStatus } = useServices();
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [servisTuruFilter, setServisTuruFilter] = useState<string>('ALL');
   const [faaliyetFilter, setFaaliyetFilter] = useState<string>('ALL');
 
   // Filtreleme
@@ -60,10 +59,9 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
         ? !['TeslimEdildi', 'IptalIade'].includes(item.durum)
         : item.durum === statusFilter;
 
-    const matchTuru = servisTuruFilter === 'ALL' ? true : item.servisTuru === servisTuruFilter;
     const matchFaaliyet = faaliyetFilter === 'ALL' ? true : item.faaliyetAlani === faaliyetFilter;
 
-    return matchSearch && matchStatus && matchTuru && matchFaaliyet;
+    return matchSearch && matchStatus && matchFaaliyet;
   });
 
   const selectedItem = services.find(s => s.id === selectedServiceId) || filtered[0];
@@ -103,32 +101,21 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
             <span>Filtre:</span>
           </div>
 
-          {/* İç / Dış Servis Filtresi */}
+          {/* Servis Türü / Faaliyet Alanı Filtresi */}
           <select
             className="form-control"
-            style={{ width: 'auto', height: '34px', fontSize: '13px' }}
-            value={servisTuruFilter}
-            onChange={e => setServisTuruFilter(e.target.value)}
-          >
-            <option value="ALL">Tüm Lokasyonlar (İç & Dış)</option>
-            <option value="IcServis">🏠 İç Servis (Atölye)</option>
-            <option value="DisServis">🚛 Dış Servis (Saha / Montaj)</option>
-          </select>
-
-          {/* Faaliyet Alanı Filtresi */}
-          <select
-            className="form-control"
-            style={{ width: 'auto', height: '34px', fontSize: '13px' }}
+            style={{ width: 'auto', height: '34px', fontSize: '13px', fontWeight: 600 }}
             value={faaliyetFilter}
             onChange={e => setFaaliyetFilter(e.target.value)}
           >
-            <option value="ALL">Tüm Sektörler / Faaliyetler</option>
+            <option value="ALL">Tüm Servis Türleri</option>
             <option value="GuvenlikKamerasi">📹 Güvenlik Kamerası (CCTV)</option>
             <option value="AlarmSistemi">🚨 Hırsız Alarm Sistemi</option>
             <option value="Bilgisayar">💻 Bilgisayar & Laptop & Server</option>
             <option value="Network">🌐 Network & Yapısal Kablolama</option>
             <option value="YanginAlarm">🔥 Yangın Alarmı</option>
             <option value="Yazilim">💻 Yazılım & Muhasebe (Diza ERP)</option>
+            <option value="Diger">📦 Diğer Teknik Servisler</option>
           </select>
 
           {/* Durum Filtresi */}
@@ -198,14 +185,14 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                       transition: 'all 0.15s ease',
                     }}
                   >
-                    {/* Üst Bilgi: Servis No, Lokasyon, Durum */}
+                    {/* Üst Bilgi: Servis No, Servis Türü, Durum */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--diza-navy)' }}>
                           {item.servisNo}
                         </span>
-                        <span className={`badge ${isDisServis ? 'badge-danger' : 'badge-primary'}`} style={{ fontSize: '10px', padding: '1px 5px' }}>
-                          {isDisServis ? 'Saha' : 'Atölye'}
+                        <span className={`badge ${faalMeta.badge || 'badge-primary'}`} style={{ fontSize: '10px', padding: '1px 5px' }}>
+                          {faalMeta.label.split(' ')[0]}
                         </span>
                       </div>
 
@@ -302,8 +289,8 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                     <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--diza-navy)' }}>
                       {selectedItem.servisNo}
                     </h2>
-                    <span className={`badge ${selectedItem.servisTuru === 'DisServis' ? 'badge-danger' : 'badge-primary'}`}>
-                      {selectedItem.servisTuru === 'DisServis' ? '🚛 Dış Servis (Saha)' : '🏠 İç Servis (Atölye)'}
+                    <span className={`badge ${FAALIYET_ALANLARI[selectedItem.faaliyetAlani]?.badge || 'badge-primary'}`}>
+                      {FAALIYET_ALANLARI[selectedItem.faaliyetAlani]?.label}
                     </span>
                     <span className={`badge ${DURUMLAR[selectedItem.durum]?.badgeClass}`}>
                       {DURUMLAR[selectedItem.durum]?.label}

@@ -122,6 +122,7 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 ) : (
                   columnItems.map(item => {
                     const nextSt = getNextStatus(item.durum);
+                    const faalMeta = FAALIYET_ALANLARI[item.faaliyetAlani];
                     return (
                       <div
                         key={item.id}
@@ -133,8 +134,8 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             <span style={{ fontWeight: 800, fontSize: '12px', color: 'var(--diza-navy)' }}>
                               {item.servisNo}
                             </span>
-                            <span className={`badge ${item.servisTuru === 'DisServis' ? 'badge-danger' : 'badge-primary'}`} style={{ fontSize: '9px', padding: '1px 4px' }}>
-                              {item.servisTuru === 'DisServis' ? 'Saha' : 'Atölye'}
+                            <span className={`badge ${faalMeta?.badge || 'badge-primary'}`} style={{ fontSize: '9px', padding: '1px 4px' }}>
+                              {faalMeta?.label.split(' ')[0] || item.faaliyetAlani}
                             </span>
                           </div>
                           {item.oncelik !== 'Normal' && (
