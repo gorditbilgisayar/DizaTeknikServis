@@ -1,7 +1,7 @@
 /**
  * Diza Teknik Servis — Gördit Bilgisayar
  * Copyright © 2024-2026 Gördit Bilgisayar — Zafer GÖRGÜN
- * Mobil & Tablet Uyumlu Servis Listesi ve Tablet Split View
+ * Sade, Kolay ve Okunaklı Servis Listesi & Bölünmüş Önizleme
  */
 
 import React, { useState } from 'react';
@@ -17,16 +17,11 @@ import {
   MapPin,
   Calendar,
   Wrench,
-  Video,
-  BellRing,
-  Network,
-  Flame,
-  Code2,
 } from 'lucide-react';
 import { useServices } from '../context/ServiceContext';
 import { DURUMLAR, FAALIYET_ALANLARI, ISLEM_TURLERI } from '../lib/constants';
 import { formatMoney, formatDateTime, buildWhatsAppLink } from '../lib/format';
-import type { TeknikServisItem, TeknikServisDurumu, ServisTuru, FaaliyetAlani } from '../types';
+import type { TeknikServisItem, TeknikServisDurumu } from '../types';
 
 interface ServiceListViewProps {
   searchQuery: string;
@@ -77,11 +72,11 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
     e.stopPropagation();
     let msg = '';
     if (item.islemTuru === 'Teklif') {
-      msg = `Sayın ${item.musteriAdSoyad}, talep ettiğiniz ${item.markaModel} projesi için fiyat teklifimiz hazırlanmıştır. Teklif tutarı: ${formatMoney(item.toplamTutar)} TL'dir. — Gördit Bilgisayar`;
+      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} için fiyat teklifimiz hazırlanmıştır. Toplam: ${formatMoney(item.toplamTutar)} TL. — Gördit Bilgisayar`;
     } else if (item.servisTuru === 'DisServis' && item.durum === 'Tamirde') {
-      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} saha montaj ve kurulum ekibimiz randevu saatinizde adresinize hareket edecektir. — Gördit Bilgisayar`;
+      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} montaj ekibimiz randevu saatinizde adresinize gelecektir. — Gördit Bilgisayar`;
     } else if (item.durum === 'Tamamlandi') {
-      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} cihazınızın / sisteminizin işlemleri başarıyla tamamlanmıştır. Kalan bakiye: ${formatMoney(item.kalanTutar)}. — Gördit Bilgisayar`;
+      msg = `Sayın ${item.musteriAdSoyad}, ${item.markaModel} işlemleri tamamlanmıştır. Kalan bakiye: ${formatMoney(item.kalanTutar)}. — Gördit Bilgisayar`;
     } else {
       msg = `Sayın ${item.musteriAdSoyad}, ${item.servisNo} takip numaralı ${item.markaModel} servis durumu: '${DURUMLAR[item.durum]?.label}'. — Gördit Bilgisayar`;
     }
@@ -89,21 +84,21 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Filtre Çubuğu */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* Sade Filtre Çubuğu */}
       <div
         className="glass-card"
         style={{
-          padding: '14px 18px',
+          padding: '12px 16px',
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '12px',
+          gap: '10px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#94a3b8', fontSize: '13px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '13px', fontWeight: 600 }}>
             <Filter size={16} />
             <span>Filtre:</span>
           </div>
@@ -111,35 +106,35 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
           {/* İç / Dış Servis Filtresi */}
           <select
             className="form-control"
-            style={{ width: 'auto', height: '36px', fontSize: '13px', fontWeight: 600 }}
+            style={{ width: 'auto', height: '34px', fontSize: '13px' }}
             value={servisTuruFilter}
             onChange={e => setServisTuruFilter(e.target.value)}
           >
             <option value="ALL">Tüm Lokasyonlar (İç & Dış)</option>
-            <option value="IcServis">🏠 Yalnızca İç Servis (Atölye)</option>
-            <option value="DisServis">🚛 Yalnızca Dış Servis (Saha / Montaj)</option>
+            <option value="IcServis">🏠 İç Servis (Atölye)</option>
+            <option value="DisServis">🚛 Dış Servis (Saha / Montaj)</option>
           </select>
 
           {/* Faaliyet Alanı Filtresi */}
           <select
             className="form-control"
-            style={{ width: 'auto', height: '36px', fontSize: '13px' }}
+            style={{ width: 'auto', height: '34px', fontSize: '13px' }}
             value={faaliyetFilter}
             onChange={e => setFaaliyetFilter(e.target.value)}
           >
             <option value="ALL">Tüm Sektörler / Faaliyetler</option>
             <option value="GuvenlikKamerasi">📹 Güvenlik Kamerası (CCTV)</option>
             <option value="AlarmSistemi">🚨 Hırsız Alarm Sistemi</option>
-            <option value="Bilgisayar">💻 Bilgisayar & Donanım & Sunucu</option>
-            <option value="Network">🌐 Network & Ağ & Kablolama</option>
-            <option value="YanginAlarm">🔥 Yangın Alarm & İhbar</option>
-            <option value="Yazilim">💻 Yazılım & Muhasebe & SQL</option>
+            <option value="Bilgisayar">💻 Bilgisayar & Laptop & Server</option>
+            <option value="Network">🌐 Network & Yapısal Kablolama</option>
+            <option value="YanginAlarm">🔥 Yangın Alarmı</option>
+            <option value="Yazilim">💻 Yazılım & Muhasebe (Diza ERP)</option>
           </select>
 
           {/* Durum Filtresi */}
           <select
             className="form-control"
-            style={{ width: 'auto', height: '36px', fontSize: '13px' }}
+            style={{ width: 'auto', height: '34px', fontSize: '13px' }}
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
           >
@@ -153,7 +148,7 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
           </select>
         </div>
 
-        <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
           Toplam <strong>{filtered.length}</strong> kayıt listeleniyor
         </div>
       </div>
@@ -162,15 +157,26 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
       <div className="tablet-split-layout">
         {/* Sol Liste Paneli */}
         <div className="split-list-panel">
-          <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Servis & Montaj Kayıtları</span>
-            <span style={{ fontSize: '11px', color: '#94a3b8' }}>{filtered.length} Adet</span>
+          <div
+            style={{
+              padding: '12px 14px',
+              borderBottom: '1px solid var(--border)',
+              fontWeight: 700,
+              fontSize: '13px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'var(--bg-subtle)',
+            }}
+          >
+            <span>Kayıtlar</span>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{filtered.length} Adet</span>
           </div>
 
-          <div style={{ overflowY: 'auto', flex: 1, padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ overflowY: 'auto', flex: 1, padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {filtered.length === 0 ? (
-              <div style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontSize: '14px' }}>
-                Kriterlere uygun servis kaydı bulunamadı.
+              <div style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+                Kriterlere uygun kayıt bulunamadı.
               </div>
             ) : (
               filtered.map(item => {
@@ -184,29 +190,26 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                     key={item.id}
                     onClick={() => onSelectService(item)}
                     style={{
-                      padding: '14px',
-                      borderRadius: '12px',
-                      background: isSelected ? 'rgba(227, 6, 19, 0.12)' : 'var(--bg-card)',
-                      border: isSelected ? '1px solid var(--logo-red)' : '1px solid var(--border-color)',
+                      padding: '12px',
+                      borderRadius: 'var(--radius-md)',
+                      background: isSelected ? 'var(--diza-red-light)' : 'var(--bg-card)',
+                      border: isSelected ? '1px solid var(--diza-red)' : '1px solid var(--border)',
                       cursor: 'pointer',
-                      transition: 'all 0.18s ease',
-                      position: 'relative',
+                      transition: 'all 0.15s ease',
                     }}
                   >
-                    {/* Üst Bilgi Satırı: Servis No, İç/Dış Etiketi, Durum Rozeti */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px', gap: '6px' }}>
+                    {/* Üst Bilgi: Servis No, Lokasyon, Durum */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontWeight: 800, fontSize: '13px', color: '#fff' }}>
+                        <span style={{ fontWeight: 800, fontSize: '13px', color: 'var(--diza-navy)' }}>
                           {item.servisNo}
                         </span>
-                        {/* İç / Dış Servis Rozeti */}
-                        <span className={`badge ${isDisServis ? 'badge-dis-servis' : 'badge-ic-servis'}`} style={{ fontSize: '10px', padding: '1px 6px' }}>
-                          {isDisServis ? <Truck size={10} /> : <Store size={10} />}
+                        <span className={`badge ${isDisServis ? 'badge-danger' : 'badge-primary'}`} style={{ fontSize: '10px', padding: '1px 5px' }}>
                           {isDisServis ? 'Saha' : 'Atölye'}
                         </span>
                       </div>
 
-                      <span className={`badge ${meta.badgeClass}`} style={{ fontSize: '10px', padding: '2px 7px' }}>
+                      <span className={`badge ${meta.badgeClass}`} style={{ fontSize: '10px' }}>
                         {meta.label}
                       </span>
                     </div>
@@ -215,17 +218,14 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                       {item.musteriAdSoyad}
                     </div>
 
-                    {/* Faaliyet Alanı & Cihaz */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#38bdf8', marginTop: '3px' }}>
-                      <span className={`badge ${faalMeta.badge}`} style={{ fontSize: '9px', padding: '1px 5px' }}>
-                        {faalMeta.label.split(' ')[0]}
-                      </span>
-                      <span>{item.markaModel}</span>
+                    {/* Model & Faaliyet */}
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                      <span style={{ fontWeight: 600, color: 'var(--diza-navy)' }}>{faalMeta.label.split(' ')[0]}</span> — {item.markaModel}
                     </div>
 
-                    {/* Dış Servis Saha Adresi Varsa */}
+                    {/* Saha Adresi */}
                     {isDisServis && item.sahaAdresi && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#ff6b72', marginTop: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--diza-red)', marginTop: '3px' }}>
                         <MapPin size={12} />
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {item.sahaAdresi}
@@ -233,9 +233,9 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                       </div>
                     )}
 
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', fontSize: '12px', color: '#94a3b8' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px', fontSize: '12px', color: 'var(--text-muted)' }}>
                       <span>{item.musteriTelefon}</span>
-                      <strong style={{ color: item.kalanTutar > 0 ? '#fb7185' : '#34d399' }}>
+                      <strong style={{ color: item.kalanTutar > 0 ? 'var(--diza-red)' : 'var(--diza-green)' }}>
                         {item.kalanTutar > 0 ? `Kalan: ${formatMoney(item.kalanTutar)}` : 'Ödendi'}
                       </strong>
                     </div>
@@ -247,41 +247,41 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                         alignItems: 'center',
                         justifyContent: 'flex-end',
                         gap: '6px',
-                        marginTop: '10px',
-                        paddingTop: '8px',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                        marginTop: '8px',
+                        paddingTop: '6px',
+                        borderTop: '1px solid var(--border-light)',
                       }}
                     >
                       <button
                         type="button"
                         className="btn btn-secondary btn-sm"
-                        style={{ height: '28px', padding: '0 8px' }}
+                        style={{ height: '26px', padding: '0 8px' }}
                         onClick={e => {
                           e.stopPropagation();
                           onOpenPrint(item);
                         }}
-                        title="Yazdır (A4 / Termal / Etiket)"
+                        title="Yazdır"
                       >
-                        <Printer size={13} />
+                        <Printer size={12} />
                       </button>
 
                       <button
                         type="button"
                         className="btn btn-whatsapp btn-sm"
-                        style={{ height: '28px', padding: '0 8px' }}
+                        style={{ height: '26px', padding: '0 8px' }}
                         onClick={e => handleWhatsAppNotify(item, e)}
-                        title="WhatsApp Bildir"
+                        title="WhatsApp"
                       >
-                        <MessageCircle size={13} />
+                        <MessageCircle size={12} />
                       </button>
 
                       <button
                         type="button"
                         className="btn btn-primary btn-sm"
-                        style={{ height: '28px', padding: '0 10px' }}
+                        style={{ height: '26px', padding: '0 8px', fontSize: '11px' }}
                         onClick={() => onSelectService(item)}
                       >
-                        Detay <ChevronRight size={13} />
+                        İncele <ChevronRight size={12} />
                       </button>
                     </div>
                   </div>
@@ -291,35 +291,37 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
           </div>
         </div>
 
-        {/* Sağ Detay Paneli */}
+        {/* Sağ Önizleme Paneli */}
         <div className="split-detail-panel">
           {selectedItem ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              {/* Başlık ve Rozetler */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Başlık ve Butonlar */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h2 style={{ fontSize: '22px', fontWeight: 800 }}>{selectedItem.servisNo}</h2>
-                    <span className={`badge ${selectedItem.servisTuru === 'DisServis' ? 'badge-dis-servis' : 'badge-ic-servis'}`}>
-                      {selectedItem.servisTuru === 'DisServis' ? 'Dış Servis / Saha' : 'İç Servis / Atölye'}
+                    <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--diza-navy)' }}>
+                      {selectedItem.servisNo}
+                    </h2>
+                    <span className={`badge ${selectedItem.servisTuru === 'DisServis' ? 'badge-danger' : 'badge-primary'}`}>
+                      {selectedItem.servisTuru === 'DisServis' ? '🚛 Dış Servis (Saha)' : '🏠 İç Servis (Atölye)'}
                     </span>
                     <span className={`badge ${DURUMLAR[selectedItem.durum]?.badgeClass}`}>
                       {DURUMLAR[selectedItem.durum]?.label}
                     </span>
                   </div>
-                  <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '3px' }}>
-                    Faaliyet: {FAALIYET_ALANLARI[selectedItem.faaliyetAlani]?.label} | İşlem: {ISLEM_TURLERI[selectedItem.islemTuru]?.label}
+                  <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '2px' }}>
+                    {FAALIYET_ALANLARI[selectedItem.faaliyetAlani]?.label} — {ISLEM_TURLERI[selectedItem.islemTuru]?.label}
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '6px' }}>
                   <button
                     type="button"
                     className="btn btn-secondary btn-sm"
                     onClick={() => onOpenPrint(selectedItem)}
                   >
-                    <Printer size={16} />
-                    <span>Yazdır</span>
+                    <Printer size={15} />
+                    <span>Fiş Yazdır</span>
                   </button>
 
                   <button
@@ -327,106 +329,108 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                     className="btn btn-whatsapp btn-sm"
                     onClick={e => handleWhatsAppNotify(selectedItem, e)}
                   >
-                    <MessageCircle size={16} />
+                    <MessageCircle size={15} />
                     <span>WhatsApp</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() => onSelectService(selectedItem)}
+                  >
+                    <span>Tam Detayı Aç</span>
+                    <ChevronRight size={15} />
                   </button>
                 </div>
               </div>
 
-              {/* Dış Servis Saha Kartı (Varsa) */}
+              {/* Dış Servis Saha Kartı */}
               {selectedItem.servisTuru === 'DisServis' && (
-                <div style={{ background: 'rgba(227, 6, 19, 0.12)', border: '1px solid rgba(227, 6, 19, 0.35)', borderRadius: '12px', padding: '14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff6b72', fontWeight: 700, fontSize: '13px', marginBottom: '8px' }}>
-                    <Truck size={16} /> Saha Montaj & Keşif Bilgileri
+                <div style={{ background: 'var(--diza-red-light)', border: '1px solid #fecdd3', borderRadius: 'var(--radius-md)', padding: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--diza-red)', fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>
+                    <Truck size={15} /> Saha Montaj & Keşif Bilgileri
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px', fontSize: '12px' }}>
                     <div>
-                      <strong style={{ color: '#cbd5e1' }}>Saha Adresi:</strong>
-                      <div style={{ color: '#fff' }}>{selectedItem.sahaAdresi || selectedItem.musteriAdres || 'Belirtilmedi'}</div>
+                      <strong>Saha Adresi:</strong>
+                      <div>{selectedItem.sahaAdresi || selectedItem.musteriAdres || 'Belirtilmedi'}</div>
                     </div>
                     <div>
-                      <strong style={{ color: '#cbd5e1' }}>Randevu Zamanı:</strong>
-                      <div style={{ color: '#fff' }}>{formatDateTime(selectedItem.sahaRandevuTarihi) || 'Planlanmadı'}</div>
+                      <strong>Randevu Tarihi:</strong>
+                      <div>{selectedItem.sahaRandevuTarihi || 'Planlanmadı'}</div>
                     </div>
                     <div>
-                      <strong style={{ color: '#cbd5e1' }}>Saha Ekibi:</strong>
-                      <div style={{ color: '#fff' }}>{selectedItem.sahaEkibi || selectedItem.atananTeknisyenAd || 'Atanmadı'}</div>
+                      <strong>Saha Ekibi:</strong>
+                      <div>{selectedItem.sahaEkibi || selectedItem.atananTeknisyenAd || 'Atanmadı'}</div>
                     </div>
-                    {selectedItem.sahaNotu && (
-                      <div style={{ gridColumn: 'span 2' }}>
-                        <strong style={{ color: '#cbd5e1' }}>Saha Notu:</strong>
-                        <div style={{ color: '#ff6b72' }}>{selectedItem.sahaNotu}</div>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
 
               {/* Müşteri & Cihaz Bilgi Kartı */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
-                <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', marginBottom: '6px', fontWeight: 700, fontSize: '13px' }}>
-                    <User size={16} /> Müşteri / Firma
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                <div style={{ background: 'var(--bg-subtle)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--diza-navy)', marginBottom: '4px', fontWeight: 700, fontSize: '12px' }}>
+                    <User size={15} /> Müşteri / Firma
                   </div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{selectedItem.musteriAdSoyad}</div>
-                  <div style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '2px' }}>Tel: {selectedItem.musteriTelefon}</div>
-                  {selectedItem.musteriEmail && <div style={{ fontSize: '12px', color: '#94a3b8' }}>{selectedItem.musteriEmail}</div>}
-                  {selectedItem.musteriAdres && <div style={{ fontSize: '12px', color: '#94a3b8' }}>{selectedItem.musteriAdres}</div>}
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedItem.musteriAdSoyad}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--diza-navy)', marginTop: '2px', fontWeight: 600 }}>{selectedItem.musteriTelefon}</div>
+                  {selectedItem.musteriAdres && <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{selectedItem.musteriAdres}</div>}
                 </div>
 
-                <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#38bdf8', marginBottom: '6px', fontWeight: 700, fontSize: '13px' }}>
-                    <Smartphone size={16} /> Sistem / Donanım
+                <div style={{ background: 'var(--bg-subtle)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--diza-navy)', marginBottom: '4px', fontWeight: 700, fontSize: '12px' }}>
+                    <Smartphone size={15} /> Sistem / Donanım
                   </div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{selectedItem.markaModel}</div>
-                  <div style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '2px' }}>Tür: {selectedItem.cihazTipi}</div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>Seri/IMEI/Mac: {selectedItem.seriNoImei}</div>
-                  {selectedItem.cihazSifresi && <div style={{ fontSize: '12px', color: '#f59e0b' }}>Şifre / Port: {selectedItem.cihazSifresi}</div>}
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-main)' }}>{selectedItem.markaModel}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Sektör: {selectedItem.cihazTipi}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Seri No: {selectedItem.seriNoImei}</div>
+                  {selectedItem.cihazSifresi && <div style={{ fontSize: '11px', color: '#d97706', fontWeight: 600 }}>Şifre: {selectedItem.cihazSifresi}</div>}
                 </div>
               </div>
 
-              {/* Şikayet ve Yapılan İşlemler */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: 700, fontSize: '13px', color: '#ff6b72', marginBottom: '4px' }}>
+              {/* Talep / Arıza Açıklaması */}
+              <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--diza-red)', marginBottom: '4px' }}>
                   Arıza / Montaj / Teklif Talebi:
                 </div>
-                <div style={{ fontSize: '13px', color: '#e2e8f0', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: '8px' }}>
+                <div style={{ fontSize: '13px', color: 'var(--text-main)', background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-sm)' }}>
                   {selectedItem.arizaTanimi}
                 </div>
 
                 {selectedItem.yapilanIslemler && (
-                  <div style={{ marginTop: '10px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '13px', color: '#34d399', marginBottom: '4px' }}>
-                      Yapılan İşlemler & Saha Raporu:
+                  <div style={{ marginTop: '8px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--diza-green)', marginBottom: '4px' }}>
+                      Yapılan İşlemler:
                     </div>
-                    <div style={{ fontSize: '13px', color: '#e2e8f0', background: 'rgba(0,0,0,0.2)', padding: '8px 12px', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-main)', background: 'var(--bg-subtle)', padding: '8px 10px', borderRadius: 'var(--radius-sm)' }}>
                       {selectedItem.yapilanIslemler}
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Finansal Kalemler & Bakiye */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.5)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: 700, fontSize: '13px', color: '#38bdf8', marginBottom: '8px' }}>
-                  Montaj & Parça & İşçilik Kalemleri
+              {/* Kalemler Tablosu */}
+              <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 700, fontSize: '12px', color: 'var(--diza-navy)', marginBottom: '6px' }}>
+                  İşlem & Parça Kalemleri
                 </div>
 
-                <div className="data-table-container">
+                <div style={{ overflowX: 'auto' }}>
                   <table className="data-table">
                     <thead>
                       <tr>
                         <th>Tür</th>
-                        <th>Kalem Açıklaması</th>
+                        <th>Açıklama</th>
                         <th>Adet</th>
-                        <th>Birim</th>
+                        <th>Birim Fiyat</th>
                         <th>Toplam</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(selectedItem.satirlar || []).length === 0 ? (
                         <tr>
-                          <td colSpan={5} style={{ textAlign: 'center', color: '#64748b' }}>
+                          <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '12px' }}>
                             Henüz işlem veya parça kalemi eklenmemiş.
                           </td>
                         </tr>
@@ -434,12 +438,12 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                         selectedItem.satirlar.map(row => (
                           <tr key={row.id}>
                             <td>
-                              <span className="badge badge-blue" style={{ fontSize: '10px' }}>{row.tur}</span>
+                              <span className="badge badge-secondary" style={{ fontSize: '10px' }}>{row.tur}</span>
                             </td>
                             <td>{row.tanim}</td>
                             <td>{row.adet}</td>
                             <td>{formatMoney(row.birimFiyat)}</td>
-                            <td style={{ fontWeight: 700 }}>{formatMoney(row.toplamTutar)}</td>
+                            <td><strong>{formatMoney(row.toplamTutar)}</strong></td>
                           </tr>
                         ))
                       )}
@@ -447,19 +451,20 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                   </table>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
-                  <div style={{ width: '280px', display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                {/* Toplam ve Bakiye */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+                  <div style={{ width: '240px', display: 'flex', flexDirection: 'column', gap: '3px', fontSize: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                       <span>Toplam Tutar:</span>
-                      <strong style={{ color: '#fff' }}>{formatMoney(selectedItem.toplamTutar)}</strong>
+                      <strong style={{ color: 'var(--diza-navy)' }}>{formatMoney(selectedItem.toplamTutar)}</strong>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--diza-green)' }}>
                       <span>Alınan Kapora:</span>
-                      <strong style={{ color: '#34d399' }}>{formatMoney(selectedItem.alinanKapora)}</strong>
+                      <strong>{formatMoney(selectedItem.alinanKapora)}</strong>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', borderTop: '1px solid var(--border-color)', paddingTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderTop: '1px solid var(--border)', paddingTop: '4px' }}>
                       <span style={{ fontWeight: 700 }}>Kalan Bakiye:</span>
-                      <strong style={{ color: selectedItem.kalanTutar > 0 ? '#fb7185' : '#34d399' }}>
+                      <strong style={{ color: selectedItem.kalanTutar > 0 ? 'var(--diza-red)' : 'var(--diza-green)' }}>
                         {formatMoney(selectedItem.kalanTutar)}
                       </strong>
                     </div>
@@ -467,9 +472,9 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
                 </div>
               </div>
 
-              {/* Hızlı Durum Değiştirme */}
+              {/* Hızlı Aşama Değiştirme */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 700 }}>Durum:</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 700 }}>Aşama:</span>
                 {(['Incelemede', 'OnayBekliyor', 'Tamirde', 'Tamamlandi', 'TeslimEdildi'] as TeknikServisDurumu[]).map(st => (
                   <button
                     key={st}
@@ -483,7 +488,7 @@ export const ServiceListView: React.FC<ServiceListViewProps> = ({
               </div>
             </div>
           ) : (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
               İncelemek için sol taraftan bir kayıt seçin.
             </div>
           )}

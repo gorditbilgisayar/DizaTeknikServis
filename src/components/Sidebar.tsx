@@ -36,8 +36,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onSelectTab }) => {
           <ShieldCheck size={24} />
         </div>
         <div>
-          <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>Diza Yazılım</h3>
-          <p style={{ fontSize: '11px', color: '#94a3b8' }}>Teknik Servis v1.0.0</p>
+          <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>Diza Servis</h3>
+          <p style={{ fontSize: '11px', color: '#94a3b8' }}>Gördit Bilgisayar v1.2.0</p>
         </div>
       </div>
 

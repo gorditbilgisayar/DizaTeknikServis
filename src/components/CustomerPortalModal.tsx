@@ -1,7 +1,7 @@
 /**
  * Diza Teknik Servis — Gördit Bilgisayar
  * Copyright © 2024-2026 Gördit Bilgisayar — Zafer GÖRGÜN
- * Müşteri Canlı Servis Durumu Sorgulama Portalı
+ * Müşteri Cihaz Sorgulama Portalı Modalı
  */
 
 import React, { useState } from 'react';
@@ -10,14 +10,14 @@ import {
   Search,
   CheckCircle2,
   Clock,
-  ShieldCheck,
-  Phone,
   MapPin,
+  Phone,
+  ShieldCheck,
   HelpCircle,
 } from 'lucide-react';
 import { useServices } from '../context/ServiceContext';
 import { DURUMLAR } from '../lib/constants';
-import { formatMoney } from '../lib/format';
+import { formatMoney, formatDateTime } from '../lib/format';
 import type { TeknikServisItem } from '../types';
 
 interface CustomerPortalModalProps {
@@ -38,14 +38,13 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const q = query.trim().toLowerCase();
-    if (!q) return;
+    const cleanQ = query.trim().toLowerCase();
+    if (!cleanQ) return;
 
     const found = services.find(
       s =>
-        s.servisNo.toLowerCase() === q ||
-        s.musteriTelefon.replace(/\D/g, '').includes(q.replace(/\D/g, '')) ||
-        s.seriNoImei.toLowerCase() === q
+        s.servisNo.toLowerCase() === cleanQ ||
+        s.musteriTelefon.replace(/\D/g, '').includes(cleanQ.replace(/\D/g, ''))
     );
 
     setSearchedService(found || null);
@@ -53,17 +52,16 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
   };
 
   const steps = [
-    { key: 'KabulEdildi', label: 'Cihaz Kabul', desc: 'Servisimize teslim alındı' },
-    { key: 'Incelemede', label: 'İnceleme & Teşhis', desc: 'Arıza tespiti yapılıyor' },
-    { key: 'OnayBekliyor', label: 'Müşteri Onayı', desc: 'Fiyat onayı bekleniyor' },
-    { key: 'Tamirde', label: 'Onarım & Test', desc: 'Donanımsal işlem yapılıyor' },
-    { key: 'Tamamlandi', label: 'Teslimata Hazır', desc: 'İşlemler tamamlandı' },
-    { key: 'TeslimEdildi', label: 'Teslim Edildi', desc: 'Müşteriye verildi' },
+    { key: 'KabulEdildi', label: 'Cihaz Alındı', desc: 'Atölyeye veya sahaya ulaştı' },
+    { key: 'Incelemede', label: 'Arıza Tespiti', desc: 'Teknisyen incelemede' },
+    { key: 'OnayBekliyor', label: 'Fiyat Onayı', desc: 'Müşteri onayı bekleniyor' },
+    { key: 'Tamirde', label: 'İşlem / Montaj', desc: 'Parça değişimi ve onarım' },
+    { key: 'Tamamlandi', label: 'Teslime Hazır', desc: 'Test edildi, hazır' },
   ];
 
-  const getStepStatus = (stepKey: string, currentDurum: string) => {
-    const order = ['KabulEdildi', 'Incelemede', 'OnayBekliyor', 'ParcaBekliyor', 'Tamirde', 'Tamamlandi', 'TeslimEdildi'];
-    const curIdx = order.indexOf(currentDurum);
+  const getStepStatus = (stepKey: string, currentStatus: string) => {
+    const order = ['KabulEdildi', 'Incelemede', 'OnayBekliyor', 'Tamirde', 'ParcaBekliyor', 'Tamamlandi', 'TeslimEdildi'];
+    const curIdx = order.indexOf(currentStatus);
     const stepIdx = order.indexOf(stepKey);
     if (curIdx >= stepIdx) return 'completed';
     return 'pending';
@@ -74,16 +72,16 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
       <div
         className="modal-content"
         onClick={e => e.stopPropagation()}
-        style={{ maxWidth: '780px', height: '85vh' }}
+        style={{ maxWidth: '780px', maxHeight: '90vh' }}
       >
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div className="brand-logo-icon">
-              <ShieldCheck size={20} />
-            </div>
+            <div className="brand-logo-box">DİZA</div>
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: 800 }}>Müşteri Cihaz Sorgulama Portalı</h3>
-              <p style={{ fontSize: '12px', color: '#94a3b8' }}>{companySettings.resmiUnvan}</p>
+              <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--diza-navy)' }}>
+                Müşteri Cihaz & Servis Sorgulama Portalı
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{companySettings.resmiUnvan}</p>
             </div>
           </div>
 
@@ -92,27 +90,36 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
           </button>
         </div>
 
-        <div className="modal-body" style={{ overflowY: 'auto' }}>
+        <div className="modal-body" style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Arama Kutusu */}
-          <div style={{ background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%)', padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', marginBottom: '20px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', marginBottom: '6px' }}>
-              Cihazınız Ne Durumda?
+          <div
+            style={{
+              background: 'var(--bg-subtle)',
+              padding: '20px',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border)',
+              textAlign: 'center',
+            }}
+          >
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--diza-navy)', marginBottom: '4px' }}>
+              Cihazınız veya Montajınız Ne Durumda?
             </h2>
-            <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '14px' }}>
               Servis fişinizdeki Servis Numarasını (Örn: TS-2026-0101) veya kayıtlı telefon numaranızı girin.
             </p>
 
-            <form onSubmit={handleSearch} style={{ display: 'flex', maxWidth: '480px', margin: '0 auto', gap: '8px' }}>
+            <form onSubmit={handleSearch} style={{ display: 'flex', maxWidth: '460px', margin: '0 auto', gap: '8px' }}>
               <input
                 type="text"
                 className="form-control"
-                placeholder="Örn: TS-2026-0101 veya 0532 412 88 90"
+                placeholder="Örn: TS-2026-0101 veya 0(541) 608 53 44"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                style={{ height: '46px', fontSize: '15px' }}
+                style={{ height: '42px', fontSize: '14px' }}
+                autoFocus
               />
-              <button type="submit" className="btn btn-primary" style={{ height: '46px', padding: '0 20px' }}>
-                <Search size={18} /> Sorgula
+              <button type="submit" className="btn btn-primary" style={{ height: '42px', padding: '0 18px', fontWeight: 700 }}>
+                <Search size={16} /> Sorgula
               </button>
             </form>
           </div>
@@ -120,13 +127,17 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
           {/* Sonuç Alanı */}
           {hasSearched && (
             searchedService ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', animation: 'fadeIn 0.25s ease' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {/* Servis Başlık Kartı */}
-                <div className="glass-card" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                <div className="glass-card" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '14px 18px' }}>
                   <div>
-                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>Takip Numarası</span>
-                    <h3 style={{ fontSize: '22px', fontWeight: 800, color: '#fff' }}>{searchedService.servisNo}</h3>
-                    <p style={{ fontSize: '14px', color: '#38bdf8', fontWeight: 600 }}>{searchedService.markaModel}</p>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Takip Fiş Numarası</span>
+                    <h3 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--diza-navy)' }}>
+                      {searchedService.servisNo}
+                    </h3>
+                    <p style={{ fontSize: '14px', color: 'var(--text-main)', fontWeight: 600 }}>
+                      {searchedService.markaModel}
+                    </p>
                   </div>
 
                   <div>
@@ -137,9 +148,11 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 </div>
 
                 {/* Süreç Zaman Çizelgesi (Timeline) */}
-                <div className="glass-card">
-                  <h4 style={{ fontSize: '14px', marginBottom: '16px', color: '#cbd5e1' }}>Servis İlerleme Aşamaları:</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+                <div className="glass-card" style={{ padding: '14px 18px' }}>
+                  <h4 style={{ fontSize: '13px', marginBottom: '12px', color: 'var(--text-muted)' }}>
+                    Servis İlerleme Aşamaları:
+                  </h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '8px' }}>
                     {steps.map(step => {
                       const st = getStepStatus(step.key, searchedService.durum);
                       const isDone = st === 'completed';
@@ -147,20 +160,20 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                         <div
                           key={step.key}
                           style={{
-                            background: isDone ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.03)',
-                            border: isDone ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--border-color)',
-                            borderRadius: '10px',
-                            padding: '12px 10px',
+                            background: isDone ? 'var(--diza-green-light)' : 'var(--bg-subtle)',
+                            border: isDone ? '1px solid var(--diza-green)' : '1px solid var(--border)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '10px 8px',
                             textAlign: 'center',
                           }}
                         >
-                          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '6px' }}>
-                            {isDone ? <CheckCircle2 size={20} color="#10b981" /> : <Clock size={20} color="#64748b" />}
+                          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }}>
+                            {isDone ? <CheckCircle2 size={18} color="var(--diza-green)" /> : <Clock size={18} color="var(--text-dim)" />}
                           </div>
-                          <div style={{ fontSize: '12px', fontWeight: 700, color: isDone ? '#fff' : '#64748b' }}>
+                          <div style={{ fontSize: '12px', fontWeight: 700, color: isDone ? 'var(--diza-green)' : 'var(--text-muted)' }}>
                             {step.label}
                           </div>
-                          <div style={{ fontSize: '10px', color: isDone ? '#94a3b8' : '#475569', marginTop: '2px' }}>
+                          <div style={{ fontSize: '10px', color: 'var(--text-dim)', marginTop: '2px' }}>
                             {step.desc}
                           </div>
                         </div>
@@ -170,30 +183,30 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 </div>
 
                 {/* Arıza ve Bilgilendirme */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
-                  <div className="glass-card">
-                    <h4 style={{ fontSize: '13px', color: '#f87171', marginBottom: '6px' }}>Bildirilen Şikayet:</h4>
-                    <p style={{ fontSize: '13px', color: '#e2e8f0' }}>{searchedService.arizaTanimi}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+                  <div className="glass-card" style={{ padding: '14px' }}>
+                    <h4 style={{ fontSize: '13px', color: 'var(--diza-red)', marginBottom: '4px' }}>Bildirilen Talep / Arıza:</h4>
+                    <p style={{ fontSize: '13px', color: 'var(--text-main)' }}>{searchedService.arizaTanimi}</p>
 
                     {searchedService.yapilanIslemler && (
-                      <div style={{ marginTop: '12px', borderTop: '1px solid var(--border-color)', paddingTop: '8px' }}>
-                        <h4 style={{ fontSize: '13px', color: '#34d399', marginBottom: '4px' }}>Servis İşlem Notu:</h4>
-                        <p style={{ fontSize: '13px', color: '#e2e8f0' }}>{searchedService.yapilanIslemler}</p>
+                      <div style={{ marginTop: '10px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
+                        <h4 style={{ fontSize: '13px', color: 'var(--diza-green)', marginBottom: '4px' }}>Servis İşlem Raporu:</h4>
+                        <p style={{ fontSize: '13px', color: 'var(--text-main)' }}>{searchedService.yapilanIslemler}</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="glass-card">
-                    <h4 style={{ fontSize: '13px', color: '#38bdf8', marginBottom: '10px' }}>Ödeme & Bakiye Durumu:</h4>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#94a3b8', marginBottom: '4px' }}>
-                      <span>Toplam Onarım Tutarı:</span>
-                      <strong style={{ color: '#fff' }}>{formatMoney(searchedService.toplamTutar)}</strong>
+                  <div className="glass-card" style={{ padding: '14px' }}>
+                    <h4 style={{ fontSize: '13px', color: 'var(--diza-navy)', marginBottom: '8px' }}>Hesap & Bakiye Durumu:</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                      <span>Toplam Tutar:</span>
+                      <strong style={{ color: 'var(--text-main)' }}>{formatMoney(searchedService.toplamTutar)}</strong>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#34d399', marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--diza-green)', marginBottom: '4px' }}>
                       <span>Ödenen Kapora:</span>
                       <strong>{formatMoney(searchedService.alinanKapora)}</strong>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 800, borderTop: '1px solid var(--border-color)', paddingTop: '6px', color: searchedService.kalanTutar > 0 ? '#fb7185' : '#34d399' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 800, borderTop: '1px solid var(--border)', paddingTop: '6px', color: searchedService.kalanTutar > 0 ? 'var(--diza-red)' : 'var(--diza-green)' }}>
                       <span>Kalan Ödenecek:</span>
                       <strong>{formatMoney(searchedService.kalanTutar)}</strong>
                     </div>
@@ -201,23 +214,37 @@ export const CustomerPortalModal: React.FC<CustomerPortalModalProps> = ({
                 </div>
 
                 {/* İletişim Bilgisi */}
-                <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '14px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '10px', fontSize: '12px', color: '#94a3b8' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MapPin size={16} color="#38bdf8" />
+                <div
+                  style={{
+                    background: 'var(--bg-subtle)',
+                    padding: '12px 16px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border)',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '12px',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <MapPin size={15} color="var(--diza-navy)" />
                     <span>{companySettings.adres}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Phone size={16} color="#38bdf8" />
-                    <span>Müşteri Hizmetleri: {companySettings.telefon} | GSM: {companySettings.gsm}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Phone size={15} color="var(--diza-navy)" />
+                    <span>Tel: {companySettings.telefon} | GSM: {companySettings.gsm}</span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
-                <HelpCircle size={36} style={{ margin: '0 auto 12px', opacity: 0.5 }} />
-                <h4 style={{ fontSize: '16px', color: '#cbd5e1' }}>Kayıt Bulunamadı</h4>
+              <div style={{ padding: '30px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <HelpCircle size={36} style={{ margin: '0 auto 10px', opacity: 0.5 }} />
+                <h4 style={{ fontSize: '15px', color: 'var(--text-main)' }}>Kayıt Bulunamadı</h4>
                 <p style={{ fontSize: '13px', marginTop: '4px' }}>
-                  Girdiğiniz arama kriterine uygun servis kaydı bulunamadı. Lütfen servis numarasını veya telefonunuzu kontrol ediniz.
+                  Girdiğiniz arama kriterine uygun servis kaydı bulunamadı. Lütfen servis fiş numaranızı veya telefonunuzu kontrol ediniz.
                 </p>
               </div>
             )

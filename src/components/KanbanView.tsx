@@ -1,7 +1,7 @@
 /**
  * Diza Teknik Servis — Gördit Bilgisayar
  * Copyright © 2024-2026 Gördit Bilgisayar — Zafer GÖRGÜN
- * Canlı Kanban İş Akışı Panosu
+ * Sade, Kolay ve Okunaklı Canlı Kanban Panosu
  */
 
 import React from 'react';
@@ -58,12 +58,14 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 800 }}>Servis Süreç Panosu (Kanban)</h2>
-          <p style={{ fontSize: '13px', color: '#94a3b8' }}>
-            Cihazların servis aşamalarını yatay panoda takip edin ve durumlarını tek tıkla ilerletin.
+          <h2 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--diza-navy)' }}>
+            Servis Süreç Panosu (Kanban)
+          </h2>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Cihaz ve montajların servis aşamalarını yatay panoda takip edin ve durumlarını tek tıkla ilerletin.
           </p>
         </div>
       </div>
@@ -85,16 +87,18 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                       background: meta.color,
                     }}
                   />
-                  <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#fff' }}>{meta.label}</h4>
+                  <h4 style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>
+                    {meta.label}
+                  </h4>
                 </div>
                 <span
                   style={{
-                    background: 'rgba(255,255,255,0.1)',
+                    background: 'var(--border-light)',
                     fontSize: '11px',
                     fontWeight: 700,
                     padding: '2px 8px',
                     borderRadius: '999px',
-                    color: '#fff',
+                    color: 'var(--text-main)',
                   }}
                 >
                   {columnItems.length}
@@ -105,15 +109,15 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                 {columnItems.length === 0 ? (
                   <div
                     style={{
-                      padding: '24px 12px',
+                      padding: '20px 10px',
                       textAlign: 'center',
-                      color: '#475569',
+                      color: 'var(--text-muted)',
                       fontSize: '12px',
-                      border: '1px dashed rgba(255,255,255,0.06)',
-                      borderRadius: '8px',
+                      border: '1px dashed var(--border)',
+                      borderRadius: 'var(--radius-sm)',
                     }}
                   >
-                    Bu aşamada cihaz yok
+                    Bu aşamada kayıt yok
                   </div>
                 ) : (
                   columnItems.map(item => {
@@ -124,12 +128,12 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                         className="kanban-card"
                         onClick={() => onSelectService(item)}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <span style={{ fontWeight: 800, fontSize: '12px', color: '#fff' }}>
+                            <span style={{ fontWeight: 800, fontSize: '12px', color: 'var(--diza-navy)' }}>
                               {item.servisNo}
                             </span>
-                            <span className={`badge ${item.servisTuru === 'DisServis' ? 'badge-dis-servis' : 'badge-ic-servis'}`} style={{ fontSize: '9px', padding: '1px 4px' }}>
+                            <span className={`badge ${item.servisTuru === 'DisServis' ? 'badge-danger' : 'badge-primary'}`} style={{ fontSize: '9px', padding: '1px 4px' }}>
                               {item.servisTuru === 'DisServis' ? 'Saha' : 'Atölye'}
                             </span>
                           </div>
@@ -138,9 +142,9 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                               style={{
                                 fontSize: '10px',
                                 fontWeight: 700,
-                                color: item.oncelik === 'Kritik' ? '#ef4444' : '#f59e0b',
-                                background: item.oncelik === 'Kritik' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                                padding: '1px 6px',
+                                color: item.oncelik === 'Kritik' ? 'var(--diza-red)' : '#d97706',
+                                background: item.oncelik === 'Kritik' ? 'var(--diza-red-light)' : '#fef3c7',
+                                padding: '1px 5px',
                                 borderRadius: '4px',
                               }}
                             >
@@ -149,21 +153,33 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                           )}
                         </div>
 
-                        <div style={{ fontWeight: 700, fontSize: '13px', color: '#fff' }}>
+                        <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--text-main)' }}>
                           {item.musteriAdSoyad}
                         </div>
 
-                        <div style={{ fontSize: '12px', color: '#cbd5e1', marginTop: '2px' }}>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
                           {item.markaModel}
                         </div>
 
-                        <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px', background: 'rgba(0,0,0,0.25)', padding: '6px 8px', borderRadius: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            color: 'var(--text-dim)',
+                            marginTop: '6px',
+                            background: 'var(--bg-subtle)',
+                            padding: '4px 6px',
+                            borderRadius: 'var(--radius-sm)',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
                           {item.arizaTanimi}
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', fontSize: '11px', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
                           <span>{item.atananTeknisyenAd || 'Atanmadı'}</span>
-                          <strong style={{ color: item.kalanTutar > 0 ? '#fb7185' : '#34d399' }}>
+                          <strong style={{ color: item.kalanTutar > 0 ? 'var(--diza-red)' : 'var(--diza-green)' }}>
                             {formatMoney(item.kalanTutar)}
                           </strong>
                         </div>
@@ -174,36 +190,36 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            marginTop: '10px',
-                            paddingTop: '8px',
-                            borderTop: '1px solid rgba(255,255,255,0.06)',
+                            marginTop: '8px',
+                            paddingTop: '6px',
+                            borderTop: '1px solid var(--border-light)',
                           }}
                         >
                           <div style={{ display: 'flex', gap: '4px' }}>
                             <button
                               type="button"
                               className="btn btn-secondary btn-sm"
-                              style={{ height: '26px', padding: '0 6px' }}
+                              style={{ height: '24px', padding: '0 6px' }}
                               onClick={e => {
                                 e.stopPropagation();
                                 onOpenPrint(item);
                               }}
                               title="Yazdır"
                             >
-                              <Printer size={12} />
+                              <Printer size={11} />
                             </button>
                             <button
                               type="button"
                               className="btn btn-whatsapp btn-sm"
-                              style={{ height: '26px', padding: '0 6px' }}
+                              style={{ height: '24px', padding: '0 6px' }}
                               onClick={e => {
                                 e.stopPropagation();
-                                const msg = `Sayın ${item.musteriAdSoyad}, ${item.servisNo} numaralı ${item.markaModel} cihazınız servisimizde '${meta.label}' aşamasındadır. — Gördit Bilgisayar`;
+                                const msg = `Sayın ${item.musteriAdSoyad}, ${item.servisNo} takip numaralı ${item.markaModel} servis durumu: '${meta.label}'. — Gördit Bilgisayar`;
                                 window.open(buildWhatsAppLink(item.musteriTelefon, msg), '_blank');
                               }}
                               title="WhatsApp"
                             >
-                              <MessageCircle size={12} />
+                              <MessageCircle size={11} />
                             </button>
                           </div>
 
@@ -211,13 +227,15 @@ export const KanbanView: React.FC<KanbanViewProps> = ({
                             <button
                               type="button"
                               className="btn btn-primary btn-sm"
-                              style={{ height: '26px', padding: '0 8px', fontSize: '11px' }}
+                              style={{ height: '24px', padding: '0 8px', fontSize: '10px' }}
                               onClick={e => {
                                 e.stopPropagation();
                                 updateServiceStatus(item.id, nextSt);
                               }}
+                              title={`${DURUMLAR[nextSt]?.label} aşamasına ilerlet`}
                             >
-                              İlerlet <ChevronRight size={12} />
+                              <span>İlerlet</span>
+                              <ChevronRight size={12} />
                             </button>
                           )}
                         </div>

@@ -25,7 +25,7 @@ import type { TeknikServisItem } from './types';
 const MainApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Modallar
   const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
